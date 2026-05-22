@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-05-07T17:37:16.417Z",
   "schema": "soggy-docos-compact-v1",
-  "source": "drive-docos-capture-merge"
+  "source": "drive-docos-capture-merge",
   "files": [
     {
       "basename": "IT'S SNOWING IT'S SNOWING IT'S SNOWING.png",
@@ -20684,9 +20684,9 @@
       ]
     },
     {
-      "basename": "it says gullible on the ceiling.jpg",
+      "basename": "it says gullible on the ceiling.png",
       "repoPaths": [
-        "soggy cat/it says gullible on the ceiling.jpg"
+        "soggy cat/it says gullible on the ceiling.png"
       ],
       "driveFileId": "1riR1LilREHCgJl8MqQMVANhKxkgTRSIG",
       "comments": [
@@ -20697,7 +20697,7 @@
           "author": "Liam Beach",
           "authorpfp": "https://lh3.googleusercontent.com/a/ACg8ocIY0VC65ftrthttcdltSyckcQW-0Z0xMD0kDXi3VDJzitryNg=s50-c-k-no",
           "id": 1758840228135,
-          "filename": "it says gullible on the ceiling.jpg",
+          "filename": "it says gullible on the ceiling.png",
           "region": [
             0.2166939948157065,
             0.006369426751592357,
@@ -20714,7 +20714,7 @@
           "author": "Phanto Tree (Phantotree)",
           "authorpfp": "https://lh3.googleusercontent.com/a-/ALV-UjW1YmNz0M_Ek3mvKKa2Fxr-4yVeWQ9o10fsDPu5L-CTFS42Kug=s50-c-k-no",
           "id": 1773112573738,
-          "filename": "it says gullible on the ceiling.jpg",
+          "filename": "it says gullible on the ceiling.png",
           "region": [
             0.8522242932426045,
             0.597758405977584,
@@ -20731,7 +20731,7 @@
           "author": "Echoden",
           "authorpfp": "https://lh3.googleusercontent.com/a-/ALV-UjUQJt1x6hhst3oqFXei5pDRouuhXZ5ZMK0oUkiQ4WFYX04R-sED=s50-c-k-no",
           "id": 1774464580317,
-          "filename": "it says gullible on the ceiling.jpg",
+          "filename": "it says gullible on the ceiling.png",
           "region": [
             0.2894120865758755,
             0.0933852140077821,
@@ -20748,7 +20748,7 @@
           "author": "Mateo",
           "authorpfp": "https://lh3.googleusercontent.com/a-/ALV-UjVwu7lNqQhyqY_SFQUtV8-jqPUexs6RAkEUUrA6Gx7B3b0RjoKN=s50-c-k-no",
           "id": 1778115141809,
-          "filename": "it says gullible on the ceiling.jpg",
+          "filename": "it says gullible on the ceiling.png",
           "region": null,
           "regiondata": null,
           "regioninfo": null
