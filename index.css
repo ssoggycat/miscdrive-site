@@ -44,7 +44,57 @@ img {
     width: min(320px, 38vw); min-width: 120px;
     background: rgba(128,128,128,0.05); overflow: hidden;
     flex-shrink: 0; transition: none;
+    display: flex; flex-direction: column; min-height: 0;
 }
+.readmesidebar .readmescroll {flex: 1 1 auto; min-height: 0}
+
+.miniplayer {
+    flex: 0 0 auto; user-select: none;
+    -webkit-user-drag: none;
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px; margin: 0 8px 8px;
+    background: rgba(43, 50, 62, 0.6);
+    border-radius: 10px;
+}
+.miniplayercover {
+    width: 40px; height: 40px;
+    border-radius: 6px; object-fit: cover;
+    flex-shrink: 0;
+}
+.miniplayermeta {flex: 1 1 auto; min-width: 0}
+.miniplayertitle {
+    color: #c5d5f3; font-size: 12px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.miniplayerartist {
+    color: #c5d5f3; opacity: 0.6;
+    font-size: 10px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.miniplayerprogress {
+    margin-top: 4px; height: 3px;
+    background: rgba(255,255,255,0.08); border-radius: 3px;
+    overflow: hidden; cursor: pointer;
+    touch-action: none;
+}
+.miniplayerprogressfill {
+    height: 100%; width: 0%;
+    background: #8ab4f8;
+}
+.miniplayertoggle {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    background: transparent; border: none; cursor: pointer;
+    border-radius: 50%;
+    color: #c5d5f3;
+}
+.miniplayertoggle:hover {background: rgba(255,255,255,0.06)}
+.miniplayericon {display: none}
+.miniplayer.playing .miniplayericonpause {display: block}
+.miniplayer:not(.playing) .miniplayericonplay {display: block}
+
+/*//////////////////////////////////////////////////////////////////////*/
 
 .goog:not(.readmeopen) .readmesidebar {
     width: 0; min-width: 0;
@@ -63,7 +113,8 @@ img {
 .readmenav {display: flex; gap: 6px}
 .readmenavbtn {
     font-family: "google sans";
-    width: 50px !important; height: 32px;
+    width: auto !important; height: 32px;
+    padding: 0 4px !important;
     border-radius: 50px !important; background: #2b323e;
     color: #c5d5f3; font-size: 12px;
 }
