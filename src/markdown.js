@@ -7,6 +7,21 @@ export function mdhelper(deps) {
     const esc = deps.esc;
     const mdcache = new Map();
 
+    function inline(s) {
+      const tokens = [];
+      s = s.replace(/\[([^\]\n]+)\]\(([^)\s]+)\)/g, (_, txt, url) => {
+        const i = tokens.length;
+        tokens.push(`<a href="${url}" target="_blank">${txt}</a>`);
+        return `\x00${i}\x00`;
+      });
+      s = s.replace(/(^|[^"'=>\w])(https?:\/\/[^\s<>"')]+)/g, '$1<a href="$2" target="_blank">$2</a>');
+      s = s.replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>');
+      s = s.replace(/(^|[^\w*])\*([^*\n]+?)\*(?!\w)/g, '$1<em>$2</em>');
+      s = s.replace(/(^|[^\w_])_([^_\n]+?)_(?!\w)/g, '$1<em>$2</em>');
+      s = s.replace(/\x00(\d+)\x00/g, (_, i) => tokens[+i]);
+      return s;
+    }
+
     function mdtohtml(md) {
       const lines = String(md || "").replace(/\r\n/g, "\n").split("\n");
       let out = "";
@@ -21,13 +36,13 @@ export function mdhelper(deps) {
         const h = line.match(/^(#{1,6})\s+(.*)$/);
         if (h) {
           const lvl = h[1].length;
-          out += `<h${lvl}>${h[2]}</h${lvl}>`;
+          out += `<h${lvl}>${inline(h[2])}</h${lvl}>`;
           continue;
         }
         if (!line.trim()) {out += ""; continue}
-        if (line.trim().startsWith("<")) out += line;
-        else if (line.includes("<")) out += `<p>${line}</p>`;
-        else out += `<p>${esc(line)}</p>`;
+        if (line.trim().startsWith("<")) out += inline(line);
+        else if (line.includes("<")) out += `<p>${inline(line)}</p>`;
+        else out += `<p>${inline(esc(line))}</p>`;
       }
       return out;
     }

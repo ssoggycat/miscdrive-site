@@ -133,6 +133,7 @@ h1, h2, h3, h4, h5, h6 {
     padding: 1em;
 }
 .readrivemediaoc {max-width: 100%; font-family: "comic sans", cursive}
+.readrivemediaoc a {overflow-wrap: anywhere; word-break: break-word}
 
 .readrivemediaoc p {
     color: #ccc; font-size: 13px;
