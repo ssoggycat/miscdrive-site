@@ -140,7 +140,6 @@ export function ctxmenu(get) {
         return;
       }
     } catch {}
-    alert(`${kindlabel} couldn't be copied.`);
   }
 
   function showpop({x, y, filepath, inpreview}) {
