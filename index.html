@@ -204,26 +204,50 @@
     <div class="medialightbox" hidden>
       <div class="mediabackdrop"></div>
       <div class="mediabox" role="dialog" aria-modal="true">
-        <button type="button" class="mediaclose headericonbutton" title="close preview">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960">
-            <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80z"/>
-          </svg>
-        </button>
+        <div class="mediatoolbar">
+          <button type="button" class="mediaclose headericonbutton" title="close preview">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#e3e3e3" viewBox="0 -960 960 960">
+              <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80z"/>
+            </svg>
+          </button>
+          <button type="button" class="mediatoolbtn mediadownload headericonbutton" title="download">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#e3e3e3" viewBox="0 -960 960 960">
+              <path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58zM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160z"/>
+            </svg>
+          </button>
+          <button type="button" class="mediatoolbtn mediacopylink headericonbutton" title="copy preview link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#e3e3e3" viewBox="0 -960 960 960">
+              <path d="M440-280H280q-83 0-141.5-58.5T80-480q0-83 58.5-141.5T280-680h160v80H280q-50 0-85 35t-35 85q0 50 35 85t85 35h160zM320-440v-80h320v80zm200 160v-80h160q50 0 85-35t35-85q0-50-35-85t-85-35H520v-80h160q83 0 141.5 58.5T880-480q0 83-58.5 141.5T680-280z"/>
+            </svg>
+          </button>
+          <button type="button" class="mediatoolbtn mediacopyimagelink headericonbutton" title="copy image link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#e3e3e3" viewBox="0 -960 960 960">
+              <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120zm0-80h560v-560H200zm40-80h480L570-480 450-320l-90-120zm-40 80v-560z"/>
+            </svg>
+          </button>
+          <button type="button" class="mediatoolbtn mediacommentstoggle headericonbutton" title="toggle comments">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#e3e3e3" viewBox="0 -960 960 960">
+              <path d="M240-400h480v-80H240zm0-120h480v-80H240zm0-120h480v-80H240zM880-80 720-240H160q-33 0-56-23t-24-57v-480q0-33 24-56t56-24h640q33 0 57 24t23 56zM160-320h594l46 45v-525H160zm0 0v-480z"/>
+            </svg>
+          </button>
+        </div>
         <div class="mediaviewport">
           <div class="mediastage">
-            <button type="button" class="medianav medianavleft headericonbutton" title="previous image" hidden>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960">
-                <path d="M560-240 320-480l240-240 56 56-184 184 184 184z"/>
-              </svg>
-            </button>
-            <button type="button" class="medianav medianavright headericonbutton" title="next image" hidden>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960">
-                <path d="M504-480 320-664l56-56 240 240-240 240-56-56z"/>
-              </svg>
-            </button>
-            <div class="mediacontent"></div>
-            <div class="mediaregionlayer"></div>
-            <div class="mediainfo" aria-live="polite"></div>
+            <div class="mediaframe">
+              <button type="button" class="medianav medianavleft headericonbutton" title="previous image" hidden>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#e3e3e3" viewBox="0 -960 960 960">
+                  <path d="M560-240 320-480l240-240 56 56-184 184 184 184z"/>
+                </svg>
+              </button>
+              <button type="button" class="medianav medianavright headericonbutton" title="next image" hidden>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#e3e3e3" viewBox="0 -960 960 960">
+                  <path d="M504-480 320-664l56-56 240 240-240 240-56-56z"/>
+                </svg>
+              </button>
+              <div class="mediacontent"></div>
+              <div class="mediaregionlayer"></div>
+              <div class="mediainfo" aria-live="polite"></div>
+            </div>
           </div>
           <aside class="mediacomments" hidden>
             <div class="mediacommentslist"></div>

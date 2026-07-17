@@ -149,10 +149,6 @@ export function ctxmenu(get) {
     try {navigator.clipboard?.writeText?.(text)?.catch?.(() => {})} catch {}
   }
 
-  function sharelink(filepath) {
-    return `${location.origin}${location.pathname}${location.search}#${encodeURI(filepath)}`;
-  }
-
   function showpop({x, y, filepath}) {
     const a = api();
     if (!a || !filepath) return;
@@ -184,7 +180,7 @@ export function ctxmenu(get) {
       {
         icon: icons.link,
         label: lb.copylink,
-        action: () => cliptext(sharelink(filepath))
+        action: () => cliptext(a.sharelink(filepath))
       },
       {
         icon: icons.media,

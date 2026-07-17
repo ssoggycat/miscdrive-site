@@ -37,6 +37,7 @@ export function drivemedia(deps) {
     let commentsindexpromise = null;
     let commentsindexbyfile = null;
     let lightboxfilename = "";
+    let lightboxpath = "";
     let lightboxcomments = [];
     let lightboximg = null;
     let lightboxnavitems = [];
@@ -373,10 +374,10 @@ export function drivemedia(deps) {
     function layoutregionlayer() {
       if (!mediaregionlayer || !lightboximg) return;
       const img = lightboximg;
-      const stage = img.closest(".mediastage");
-      if (!stage) return;
+      const frame = img.closest(".mediaframe");
+      if (!frame) return;
       const ib = img.getBoundingClientRect();
-      const sb = stage.getBoundingClientRect();
+      const sb = frame.getBoundingClientRect();
       mediaregionlayer.style.left = `${Math.max(0, ib.left - sb.left)}px`;
       mediaregionlayer.style.top = `${Math.max(0, ib.top - sb.top)}px`;
       mediaregionlayer.style.width = `${Math.max(0, Math.min(sb.width, ib.width))}px`;
@@ -460,6 +461,7 @@ export function drivemedia(deps) {
       updatemediainfo(pathname);
       const filename = pathname.split("/").pop() || "";
       lightboxfilename = filename;
+      lightboxpath = pathname;
       sethash(pathname);
       activereplyto = null;
       activefocuskey = null;
@@ -568,6 +570,7 @@ export function drivemedia(deps) {
         if (medicomments) medicomments.hidden = true;
 
         lightboxfilename = "";
+        lightboxpath = "";
         lightboxcomments = [];
         lightboximg = null;
         lightboxnavitems = [];
@@ -758,6 +761,7 @@ export function drivemedia(deps) {
 
   return {
     clearcommentfocus, closelightbox,
+    currentpath: () => lightboxpath,
     hasfocus, openlightbox,
     refreshcomments, relayout,
     rendercommentpanel, renderregions,

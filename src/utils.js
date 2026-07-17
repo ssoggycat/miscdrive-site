@@ -67,10 +67,13 @@ function iconfor(name) {
   if (audioext.test(name)) return svg.audio;
   return svg.generic;
 }
+function sharelink(path) {
+  return `${location.origin}${location.pathname}${location.search}#${encodeURI(String(path || ""))}`;
+}
 
 export const drive = {
   audioext, basename, esc, extname,
   formatbytes, formattimecompact,
   iconfor, imageext, norm,
-  rawurl, svg, thumburl, videoext
+  rawurl, sharelink, svg, thumburl, videoext
 };

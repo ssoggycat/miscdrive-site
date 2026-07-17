@@ -13,7 +13,7 @@ const ttlms = 24 * 60 * 60 * 1000;
 
 const {
   audioext, basename, esc, extname, formatbytes, formattimecompact,
-  iconfor, imageext, norm, rawurl, svg, thumburl, videoext
+  iconfor, imageext, norm, rawurl, sharelink, svg, thumburl, videoext
 } = drive;
 
 const drivegrid = document.querySelector(".drivegrid"),
@@ -40,6 +40,11 @@ const drivegrid = document.querySelector(".drivegrid"),
   medianavleft = document.querySelector(".medianavleft"),
   medianavright = document.querySelector(".medianavright"),
   mediaregionlayer = document.querySelector(".mediaregionlayer"),
+  mediatoolbar = document.querySelector(".mediatoolbar"),
+  mediadownload = document.querySelector(".mediadownload"),
+  mediacopylink = document.querySelector(".mediacopylink"),
+  mediacopyimagelink = document.querySelector(".mediacopyimagelink"),
+  mediacommentstoggle = document.querySelector(".mediacommentstoggle"),
   medicomments = document.querySelector(".mediacomments"),
   medicommentslist = document.querySelector(".mediacommentslist"),
   mediainfo = document.querySelector(".mediainfo"),
@@ -378,6 +383,8 @@ function setcomments(show) {
   state.commentsopen = show;
   if (commentsbutton)
     commentsbutton.classList.toggle("commentsmuted", !show);
+  if (mediacommentstoggle)
+    mediacommentstoggle.classList.toggle("commentsmuted", !show);
   setsetting("commentson", show ? 1 : 0);
   hidehint();
 }
@@ -472,15 +479,55 @@ if (mediabackdrop) mediabackdrop.addEventListener("click", () => {
   if (box) box.addEventListener("click", e => {
     if (!medialightbox || medialightbox.hidden) return;
     const t = e.target;
-    const inregionlayer = !!mediaregionlayer?.contains(t);
     if (mediacontent?.contains(t)) return;
     if (medicomments?.contains(t)) return;
-    if (inregionlayer) return;
-    if (mediaclose?.contains?.(t)) return;
+    if (mediaregionlayer?.contains(t)) return;
+    if (mediatoolbar?.contains?.(t)) return;
+    if (mediainfo?.contains?.(t)) return;
     if (medianavleft?.contains?.(t) || medianavright?.contains?.(t)) return;
-    media.clearcommentfocus();
+    if (media.hasfocus()) {media.clearcommentfocus(); return}
+    media.closelightbox();
   });
 }
+function flashcopied(btn) {
+  btn.classList.add("copied");
+  window.setTimeout(() => btn.classList.remove("copied"), 900);
+}
+if (mediadownload) mediadownload.addEventListener("click", async () => {
+  const p = media.currentpath();
+  if (!p) return;
+  const url = rawurl(p);
+  try {
+    const res = await fetch(url, {cache: "force-cache"});
+    if (!res.ok) throw new Error(`fetch failed (${res.status})`);
+    const blob = await res.blob();
+    const objurl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = objurl;
+    a.rel = "noopener noreferrer";
+    a.download = basename(p) || "file";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.setTimeout(() => URL.revokeObjectURL(objurl), 30_000);
+  } catch {window.open(url, "_blank", "noopener,noreferrer")}
+});
+if (mediacopylink) mediacopylink.addEventListener("click", () => {
+  const p = media.currentpath();
+  if (!p) return;
+  try {navigator.clipboard?.writeText?.(sharelink(p))?.catch?.(() => {})} catch {}
+  flashcopied(mediacopylink);
+});
+if (mediacopyimagelink) mediacopyimagelink.addEventListener("click", () => {
+  const p = media.currentpath();
+  if (!p) return;
+  try {navigator.clipboard?.writeText?.(rawurl(p))?.catch?.(() => {})} catch {}
+  flashcopied(mediacopyimagelink);
+});
+if (mediacommentstoggle) mediacommentstoggle.addEventListener("click", () => {
+  setcomments(!state.commentsopen);
+  media.refreshcomments();
+});
 if (medianavleft) medianavleft.addEventListener("click", () => media.steplightboximage(-1));
 if (medianavright) medianavright.addEventListener("click", () => media.steplightboximage(1));
 if (medicommentslist) {
@@ -521,7 +568,7 @@ document.addEventListener("keydown", e => {
 /*//////////////////////////////////////////////////////////////////////*/
 
 const pub = {
-  rawurl, thumburl,
+  rawurl, sharelink, thumburl,
   openlightbox: (...a) => media.openlightbox(...a),
   imageext, videoext
 };
