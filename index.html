@@ -39,7 +39,7 @@
 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>soggy cat — Goog...le Drive</title>
+    <title>soggy cat – Goog...le Drive</title>
 
     <link rel="icon" type="image/png" href="favicon.png" />
     <link rel="stylesheet" href="index.css" />
@@ -135,6 +135,17 @@
                   </svg>
                 </button>
               </div>
+              <div class="viewtoggle thumbsizetoggle insearch" role="group">
+                <button type="button" class="viewbutton" data-size="s" title="small thumbnails">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960"><path transform="translate(480 -480) scale(0.55) translate(-480 480)" d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120zm0-80h560v-560H200z"/></svg>
+                </button>
+                <button type="button" class="viewbutton" data-size="m" title="medium thumbnails">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960"><path transform="translate(480 -480) scale(0.75) translate(-480 480)" d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120zm0-80h560v-560H200z"/></svg>
+                </button>
+                <button type="button" class="viewbutton" data-size="l" title="large thumbnails">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120zm0-80h560v-560H200z"/></svg>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -225,29 +236,27 @@
               <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120zm0-80h560v-560H200zm40-80h480L570-480 450-320l-90-120zm-40 80v-560z"/>
             </svg>
           </button>
-          <button type="button" class="mediatoolbtn mediacommentstoggle headericonbutton" title="toggle comments">
+          <button type="button" class="mediatoolbtn mediacommentbtn headericonbutton" title="add comment">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#e3e3e3" viewBox="0 -960 960 960">
-              <path d="M240-400h480v-80H240zm0-120h480v-80H240zm0-120h480v-80H240zM880-80 720-240H160q-33 0-56-23t-24-57v-480q0-33 24-56t56-24h640q33 0 57 24t23 56zM160-320h594l46 45v-525H160zm0 0v-480z"/>
+              <path d="M440-400h80v-120h120v-80H520v-120h-80v120H320v80h120zM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240zm126-240h594v-480H160v525zm-46 0v-480z"/>
             </svg>
           </button>
         </div>
         <div class="mediaviewport">
           <div class="mediastage">
-            <div class="mediaframe">
-              <button type="button" class="medianav medianavleft headericonbutton" title="previous image" hidden>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#e3e3e3" viewBox="0 -960 960 960">
-                  <path d="M560-240 320-480l240-240 56 56-184 184 184 184z"/>
-                </svg>
-              </button>
-              <button type="button" class="medianav medianavright headericonbutton" title="next image" hidden>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#e3e3e3" viewBox="0 -960 960 960">
-                  <path d="M504-480 320-664l56-56 240 240-240 240-56-56z"/>
-                </svg>
-              </button>
-              <div class="mediacontent"></div>
-              <div class="mediaregionlayer"></div>
-              <div class="mediainfo" aria-live="polite"></div>
-            </div>
+            <button type="button" class="medianav medianavleft headericonbutton" title="previous image" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960">
+                <path d="M560-240 320-480l240-240 56 56-184 184 184 184z"/>
+              </svg>
+            </button>
+            <button type="button" class="medianav medianavright headericonbutton" title="next image" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960">
+                <path d="M504-480 320-664l56-56 240 240-240 240-56-56z"/>
+              </svg>
+            </button>
+            <div class="mediacontent"></div>
+            <div class="mediaregionlayer"></div>
+            <div class="mediainfo" aria-live="polite"></div>
           </div>
           <aside class="mediacomments" hidden>
             <div class="mediacommentslist"></div>

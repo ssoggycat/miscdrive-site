@@ -22,6 +22,7 @@ const drivegrid = document.querySelector(".drivegrid"),
   refreshtime = document.querySelector(".refreshtime"),
   viewlist = document.querySelector(".viewlist"),
   viewsquare = document.querySelector(".viewsquare"),
+  thumbsizetoggle = document.querySelector(".thumbsizetoggle"),
   goog = document.querySelector(".goog"),
   backbutton = document.querySelector(".backbutton"),
   readmebutton = document.querySelector(".readmebutton"),
@@ -44,7 +45,7 @@ const drivegrid = document.querySelector(".drivegrid"),
   mediadownload = document.querySelector(".mediadownload"),
   mediacopylink = document.querySelector(".mediacopylink"),
   mediacopyimagelink = document.querySelector(".mediacopyimagelink"),
-  mediacommentstoggle = document.querySelector(".mediacommentstoggle"),
+  mediacommentbtn = document.querySelector(".mediacommentbtn"),
   medicomments = document.querySelector(".mediacomments"),
   medicommentslist = document.querySelector(".mediacommentslist"),
   mediainfo = document.querySelector(".mediainfo"),
@@ -250,10 +251,25 @@ function openfromhash() {
   media.openlightbox(rawurl(normp), normp, videoext.test(normp));
 }
 
+function folderpreviews(path, max) {
+  const prefix = `${path}/`;
+  const out = [];
+  for (const x of state.tree) {
+    if (x.type !== "blob" || !x.path.startsWith(prefix)) continue;
+    const name = x.path.split("/").pop() || "";
+    if (!imageext.test(name) && !videoext.test(name)) continue;
+    out.push(x.path);
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
 function rendergrid() {
   const all = tree.listchildren(state.cwd).filter(x => x.name.toLowerCase().includes(state.filter.toLowerCase()));
   const folders = all.filter(x => x.kind === "folder");
   const files = all.filter(x => x.kind === "file");
+  const sizekey = getsetting("thumbsize", "m");
+  const sizeclass = sizekey === "s" ? " thumbsmall" : sizekey === "l" ? " thumblarge" : "";
   drivegrid.innerHTML = "";
   if (!all.length) {
     drivegrid.innerHTML = `<div class="emptystate">${state.filter ? "No files match your search." : "This folder is empty."}</div>`;
@@ -261,11 +277,26 @@ function rendergrid() {
   }
   if (folders.length) {
     const row = document.createElement("div");
-    row.className = "folderrow";
+    row.className = state.listmode ? "folderrow" : `folderrow foldergrid${sizeclass}`;
     for (const f of folders) {
       const card = document.createElement("div");
-      card.className = "foldercard";
-      card.innerHTML = `${svg.folder}<span class="name"></span>`;
+      if (state.listmode) {
+        card.className = "foldercard";
+        card.innerHTML = `${svg.folder}<span class="name"></span>`;
+      } else {
+        card.className = "filecard foldergridcard";
+        const previews = folderpreviews(f.path, 4);
+        card.innerHTML =
+          `<div class="filehead">${svg.folder}<span class="name"></span></div>` +
+          `<div class="thumb folderthumb">` +
+          `<div class="thumbicon">${svg.folder}</div>` +
+          (previews.length
+            ? `<div class="folderthumbgrid count${previews.length}">` +
+              previews.map(p => `<img class="thumbimg thumbimgpending" data-src="${thumburl(p)}" alt="" loading="lazy">`).join("") +
+              `</div>`
+            : "") +
+          `</div>`;
+      }
       card.querySelector(".name").textContent = f.name;
       card.addEventListener("click", () => navigate(f.path, {stack: true}));
       row.appendChild(card);
@@ -274,7 +305,7 @@ function rendergrid() {
   }
   if (files.length) {
     const grid = document.createElement("div");
-    grid.className = `filegrid${state.listmode ? " listmode" : ""}`;
+    grid.className = `filegrid${state.listmode ? " listmode" : ""}${sizeclass}`;
     for (const f of files) {
       const card = document.createElement("div");
       card.className = "filecard";
@@ -360,7 +391,7 @@ media = drivemedia({
   commentsarchiveurl, commentsindexapi, commentslivebase,
   medialightbox, mediabackdrop, mediaclose,
   mediacontent, medianavleft, medianavright, mediaregionlayer,
-  medicomments, medicommentslist, mediainfo
+  medicomments, medicommentslist, mediainfo, mediacommentbtn
 });
 
 function navigate(path, opts) {
@@ -383,8 +414,6 @@ function setcomments(show) {
   state.commentsopen = show;
   if (commentsbutton)
     commentsbutton.classList.toggle("commentsmuted", !show);
-  if (mediacommentstoggle)
-    mediacommentstoggle.classList.toggle("commentsmuted", !show);
   setsetting("commentson", show ? 1 : 0);
   hidehint();
 }
@@ -426,8 +455,18 @@ function setview(listmode) {
   state.listmode = listmode;
   viewlist.classList.toggle("active", listmode);
   viewsquare.classList.toggle("active", !listmode);
+  if (thumbsizetoggle) thumbsizetoggle.classList.toggle("sizehidden", listmode);
   setsetting("viewmode", listmode ? "list" : "grid");
   rendergrid();
+}
+
+function setthumbsize(size, rerender = true) {
+  setsetting("thumbsize", size);
+  if (thumbsizetoggle) {
+    for (const b of thumbsizetoggle.querySelectorAll(".viewbutton"))
+      b.classList.toggle("active", b.getAttribute("data-size") === size);
+  }
+  if (rerender) rendergrid();
 }
 function readmebtn() {
   if (!readmebutton || !goog) return;
@@ -452,6 +491,10 @@ refreshbutton.addEventListener("click", () => {
 });
 viewlist.addEventListener("click", () => setview(true));
 viewsquare.addEventListener("click", () => setview(false));
+if (thumbsizetoggle) {
+  for (const b of thumbsizetoggle.querySelectorAll(".viewbutton"))
+    b.addEventListener("click", () => setthumbsize(b.getAttribute("data-size") || "m"));
+}
 if (backbutton) backbutton.addEventListener("click", gobackfolder);
 if (readmebutton) readmebutton.addEventListener("click", togglereadme);
 if (readmeclose) readmeclose.addEventListener("click", togglereadme);
@@ -524,9 +567,9 @@ if (mediacopyimagelink) mediacopyimagelink.addEventListener("click", () => {
   try {navigator.clipboard?.writeText?.(rawurl(p))?.catch?.(() => {})} catch {}
   flashcopied(mediacopyimagelink);
 });
-if (mediacommentstoggle) mediacommentstoggle.addEventListener("click", () => {
-  setcomments(!state.commentsopen);
-  media.refreshcomments();
+if (mediacommentbtn) mediacommentbtn.addEventListener("click", () => {
+  if (!state.commentsopen) setcomments(true);
+  media.startcomment();
 });
 if (medianavleft) medianavleft.addEventListener("click", () => media.steplightboximage(-1));
 if (medianavright) medianavright.addEventListener("click", () => media.steplightboximage(1));
@@ -578,6 +621,7 @@ ctxmenu(() => pub);
 syncback();
 readmebtn();
 setcomments(getsetting("commentson", 0) === 1);
+setthumbsize(getsetting("thumbsize", "m"), false);
 setview(getsetting("viewmode", "grid") === "list");
 discord.updatediscordavatar();
 discord.handlediscordoauthcallbackifpresent();

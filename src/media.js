@@ -32,6 +32,7 @@ export function drivemedia(deps) {
     const medicomments = deps.medicomments;
     const medicommentslist = deps.medicommentslist;
     const mediainfo = deps.mediainfo;
+    const mediacommentbtn = deps.mediacommentbtn;
 
     const commentscache = new Map();
     let commentsindexpromise = null;
@@ -45,6 +46,7 @@ export function drivemedia(deps) {
     let activereplyto = null;
     let activefocuskey = null;
     let activeregion = null;
+    let composerequested = false;
     let regionselectstart = null;
     let regionpointerdown = null;
     let regioncycle = null;
@@ -66,9 +68,12 @@ export function drivemedia(deps) {
       const meta = [];
       const sz = formatbytes(item?.size);
       if (sz) meta.push(sz);
-      if (extra.width && extra.height) meta.push(`${extra.width} x ${extra.height}px`);
-      const dur = formattimecompact(extra.duration);
-      if (dur) meta.push(dur);
+      if (kind === "image" || kind === "video")
+        meta.push(extra.width && extra.height ? `${extra.width} x ${extra.height}px` : "??? x ???px");
+      if (kind === "video") {
+        const dur = formattimecompact(extra.duration);
+        meta.push(dur || "?:??");
+      }
       meta.push(ext ? `${kind}/${ext}` : kind);
       mediainfo.innerHTML =
         `<div class="mediainfofilename">${esc(file)}</div>` +
@@ -156,7 +161,8 @@ export function drivemedia(deps) {
         medicomments.hidden = true;
         medicommentslist.innerHTML = "";
         activereplyto = null; activefocuskey = null;
-        activeregion = null; hidehint();
+        activeregion = null; composerequested = false;
+        hidehint();
         return;
       }
       medicomments.hidden = false;
@@ -165,7 +171,6 @@ export function drivemedia(deps) {
 
       const loggedin = !!getsetting("discord_token", "");
       comments = (Array.isArray(comments) ? comments : []).filter(c => (c?.plain || "").trim().length > 0);
-      if (!comments.length) return;
       const byid = new Map();
       for (const c of comments) {
         const key = c?.replyid ? String(c.replyid) : String(c?.id || "");
@@ -312,6 +317,7 @@ export function drivemedia(deps) {
                   activereplyto = null;
                   activefocuskey = null;
                   activeregion = null;
+                  composerequested = false;
                   commentscache.delete(lightboxfilename);
                   const refreshed = await fetchcomments(lightboxfilename);
                   lightboxcomments = refreshed;
@@ -325,13 +331,13 @@ export function drivemedia(deps) {
           }
         }; medicommentslist.appendChild(chainwrap);
       }
-      if (loggedin && activeregion && !activereplyto && !activefocuskey) {
+      if (loggedin && (activeregion || composerequested) && !activereplyto && !activefocuskey) {
         const composer = document.createElement("div");
         composer.className = "mediacomment commentcomposerwrap regioncomposer";
 
         // region comment prompt template
         composer.innerHTML =
-          `<textarea class="commentcompose" rows="3" placeholder="write a comment for this region.."></textarea>` +
+          `<textarea class="commentcompose" rows="3" placeholder="${activeregion ? "write a comment for this region.." : "write a comment.."}"></textarea>` +
           `<div class="commentcomposeactions">` +
           `<button type="button" class="commentpost">post</button>` +
           `</div>`;
@@ -358,7 +364,7 @@ export function drivemedia(deps) {
             });
             if (res.ok) {
               activereplyto = null; activefocuskey = null;
-              activeregion = null;
+              activeregion = null; composerequested = false;
               commentscache.delete(lightboxfilename);
               const refreshed = await fetchcomments(lightboxfilename);
               lightboxcomments = refreshed;
@@ -374,10 +380,10 @@ export function drivemedia(deps) {
     function layoutregionlayer() {
       if (!mediaregionlayer || !lightboximg) return;
       const img = lightboximg;
-      const frame = img.closest(".mediaframe");
-      if (!frame) return;
+      const stage = img.closest(".mediastage");
+      if (!stage) return;
       const ib = img.getBoundingClientRect();
-      const sb = frame.getBoundingClientRect();
+      const sb = stage.getBoundingClientRect();
       mediaregionlayer.style.left = `${Math.max(0, ib.left - sb.left)}px`;
       mediaregionlayer.style.top = `${Math.max(0, ib.top - sb.top)}px`;
       mediaregionlayer.style.width = `${Math.max(0, Math.min(sb.width, ib.width))}px`;
@@ -466,12 +472,14 @@ export function drivemedia(deps) {
       activereplyto = null;
       activefocuskey = null;
       activeregion = null;
+      composerequested = false;
+      if (mediacommentbtn) mediacommentbtn.hidden = !!video;
       const siblings = listchildren(state.cwd)
-        .filter(x => x.kind === "file" && imageext.test(x.name))
+        .filter(x => x.kind === "file" && (imageext.test(x.name) || videoext.test(x.name)))
         .map(x => ({url: rawurl(x.path), path: x.path, name: x.name}));
       lightboxnavitems = siblings;
       lightboxnavindex = siblings.findIndex(x => x.path === pathname);
-      const shownav = !video && siblings.length > 1 && lightboxnavindex !== -1;
+      const shownav = siblings.length > 1 && lightboxnavindex !== -1;
 
       if (medianavleft) {
         medianavleft.hidden = !shownav;
@@ -502,6 +510,8 @@ export function drivemedia(deps) {
           });
         }
         mediacontent.appendChild(v);
+        lightboximg = null;
+        lightboxcomments = [];
         if (medicomments) {medicomments.hidden = true; medicommentslist.innerHTML = ""}
       } else {
         const img = document.createElement("img");
@@ -542,20 +552,31 @@ export function drivemedia(deps) {
       const item = lightboxnavitems[next];
       if (!item) return;
       lightboxnavindex = next;
-      openlightbox(item.url, item.path, false);
+      openlightbox(item.url, item.path, videoext.test(item.name));
     }
     function clearcommentfocus() {
       if (!medialightbox || medialightbox.hidden) return;
-      if (!activefocuskey && !activereplyto && !activeregion) return;
+      if (!activefocuskey && !activereplyto && !activeregion && !composerequested) return;
       activereplyto = null;
       activefocuskey = null;
       activeregion = null;
+      composerequested = false;
+      renderregions(lightboxcomments);
+      rendercommentpanel(lightboxcomments);
+    }
+
+    function startcomment() {
+      if (!medialightbox || medialightbox.hidden || !lightboximg) return;
+      activereplyto = null;
+      activefocuskey = null;
+      activeregion = null;
+      composerequested = true;
       renderregions(lightboxcomments);
       rendercommentpanel(lightboxcomments);
     }
 
     function hasfocus() {
-      return !!(activefocuskey || activereplyto || activeregion);
+      return !!(activefocuskey || activereplyto || activeregion || composerequested);
     }
 
     function closelightbox() {
@@ -578,6 +599,7 @@ export function drivemedia(deps) {
         activereplyto = null;
         activefocuskey = null;
         activeregion = null;
+        composerequested = false;
         regionselectstart = null;
 
         sethash("");
@@ -765,7 +787,7 @@ export function drivemedia(deps) {
     hasfocus, openlightbox,
     refreshcomments, relayout,
     rendercommentpanel, renderregions,
-    steplightboximage
+    startcomment, steplightboximage
   };
 
 }
