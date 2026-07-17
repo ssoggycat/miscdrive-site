@@ -229,7 +229,11 @@ function openfromhash() {
   const p = hashpath();
   if (!p) return;
   const normp = String(p).replace(/^\/+/, "");
-  const folderonly = state.tree.some(x => x.type === "tree" && x.path === normp);
+  const isfile = state.tree.some(x => x.type === "blob" && x.path === normp);
+  const folderonly = !isfile && (
+    state.tree.some(x => x.type === "tree" && x.path === normp) ||
+    state.tree.some(x => x.type === "blob" && x.path.startsWith(`${normp}/`))
+  );
   if (folderonly) {
     if (state.cwd !== normp) {
       pathhistory = [""];
@@ -277,26 +281,22 @@ function rendergrid() {
   }
   if (folders.length) {
     const row = document.createElement("div");
-    row.className = state.listmode ? "folderrow" : `folderrow foldergrid${sizeclass}`;
+    row.className = state.listmode ? "folderrow folderlist" : `folderrow foldergrid${sizeclass}`;
     for (const f of folders) {
       const card = document.createElement("div");
-      if (state.listmode) {
-        card.className = "foldercard";
-        card.innerHTML = `${svg.folder}<span class="name"></span>`;
-      } else {
-        card.className = "filecard foldergridcard";
-        const previews = folderpreviews(f.path, 4);
-        card.innerHTML =
-          `<div class="filehead">${svg.folder}<span class="name"></span></div>` +
-          `<div class="thumb folderthumb">` +
-          `<div class="thumbicon">${svg.folder}</div>` +
-          (previews.length
-            ? `<div class="folderthumbgrid count${previews.length}">` +
-              previews.map(p => `<img class="thumbimg thumbimgpending" data-src="${thumburl(p)}" alt="" loading="lazy">`).join("") +
-              `</div>`
-            : "") +
-          `</div>`;
-      }
+      card.className = "filecard foldergridcard";
+      card.setAttribute("data-folderpath", f.path);
+      const previews = folderpreviews(f.path, 4);
+      card.innerHTML =
+        `<div class="filehead">${svg.folder}<span class="name"></span></div>` +
+        `<div class="thumb folderthumb">` +
+        `<div class="thumbicon">${svg.folder}</div>` +
+        (previews.length
+          ? `<div class="folderthumbgrid count${previews.length}">` +
+            previews.map(p => `<img class="thumbimg thumbimgpending" data-src="${thumburl(p)}" alt="" loading="lazy">`).join("") +
+            `</div>`
+          : "") +
+        `</div>`;
       card.querySelector(".name").textContent = f.name;
       card.addEventListener("click", () => navigate(f.path, {stack: true}));
       row.appendChild(card);
@@ -387,7 +387,7 @@ media = drivemedia({
   formatbytes, formattimecompact,
   imageext, videoext, audioext,
   rawurl, listchildren: tree.listchildren,
-  sethash: sethashpath, hidehint,
+  sethash: p => sethashpath(p || state.cwd), hidehint,
   commentsarchiveurl, commentsindexapi, commentslivebase,
   medialightbox, mediabackdrop, mediaclose,
   mediacontent, medianavleft, medianavright, mediaregionlayer,
@@ -399,6 +399,7 @@ function navigate(path, opts) {
   if (opts?.crumb) pathhistory = [];
   else if (opts?.stack && next !== state.cwd) pathhistory.push(state.cwd);
   state.cwd = next;
+  sethashpath(state.cwd);
   syncback();
   rendergrid();
 }
@@ -406,6 +407,7 @@ function navigate(path, opts) {
 function gobackfolder() {
   if (!pathhistory.length) return;
   state.cwd = pathhistory.pop() || "";
+  sethashpath(state.cwd);
   syncback();
   rendergrid();
 }
@@ -532,10 +534,6 @@ if (mediabackdrop) mediabackdrop.addEventListener("click", () => {
     media.closelightbox();
   });
 }
-function flashcopied(btn) {
-  btn.classList.add("copied");
-  window.setTimeout(() => btn.classList.remove("copied"), 900);
-}
 if (mediadownload) mediadownload.addEventListener("click", async () => {
   const p = media.currentpath();
   if (!p) return;
@@ -559,13 +557,11 @@ if (mediacopylink) mediacopylink.addEventListener("click", () => {
   const p = media.currentpath();
   if (!p) return;
   try {navigator.clipboard?.writeText?.(sharelink(p))?.catch?.(() => {})} catch {}
-  flashcopied(mediacopylink);
 });
 if (mediacopyimagelink) mediacopyimagelink.addEventListener("click", () => {
   const p = media.currentpath();
   if (!p) return;
   try {navigator.clipboard?.writeText?.(rawurl(p))?.catch?.(() => {})} catch {}
-  flashcopied(mediacopyimagelink);
 });
 if (mediacommentbtn) mediacommentbtn.addEventListener("click", () => {
   if (!state.commentsopen) setcomments(true);
@@ -613,6 +609,7 @@ document.addEventListener("keydown", e => {
 const pub = {
   rawurl, sharelink, thumburl,
   openlightbox: (...a) => media.openlightbox(...a),
+  openfolder: p => navigate(p, {stack: true}),
   imageext, videoext
 };
 globalThis.meow = pub;

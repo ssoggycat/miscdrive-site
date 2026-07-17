@@ -13,7 +13,8 @@ export function ctxmenu(get) {
     download: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960"><path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58zM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160z"/></svg>`,
     copy: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960"><path d="M760-200H320q-33 0-56-23t-24-57v-560q0-33 24-56t56-24h280l240 240v400q0 33-23 57t-57 23M560-640v-200H320v560h440v-360zM160-40q-33 0-56-23t-24-57v-560h80v560h440v80zm160-800v200zv560z"/></svg>`,
     link: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960"><path d="M440-280H280q-83 0-141.5-58.5T80-480q0-83 58.5-141.5T280-680h160v80H280q-50 0-85 35t-35 85q0 50 35 85t85 35h160zM320-440v-80h320v80zm200 160v-80h160q50 0 85-35t35-85q0-50-35-85t-85-35H520v-80h160q83 0 141.5 58.5T880-480q0 83-58.5 141.5T680-280z"/></svg>`,
-    media: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120zm0-80h560v-560H200zm40-80h480L570-480 450-320l-90-120zm-40 80v-560z"/></svg>`
+    media: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120zm0-80h560v-560H200zm40-80h480L570-480 450-320l-90-120zm-40 80v-560z"/></svg>`,
+    folder: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960"><path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h240l80 80h320q33 0 56.5 23.5T880-640v400q0 33-23.5 56.5T800-160zm0-80h640v-400H447l-80-80H160zm0 0v-480z"/></svg>`
   };
 
   function hashpath() {
@@ -149,15 +150,54 @@ export function ctxmenu(get) {
     try {navigator.clipboard?.writeText?.(text)?.catch?.(() => {})} catch {}
   }
 
+  function openmenu(x, y, items) {
+    const wrap = ensurewrap();
+    const menu = wrap.querySelector(".contextmenu");
+    if (!menu) return;
+    menu.innerHTML = "";
+
+    for (const it of items) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "contextmenuitem";
+      btn.setAttribute("role", "menuitem");
+      btn.innerHTML = `<span class="contextmenuicon">${it.icon}</span><span class="contextmenutext"></span>`;
+      btn.querySelector(".contextmenutext").textContent = it.label;
+      btn.addEventListener("click", e => {
+        e.preventDefault();
+        e.stopPropagation();
+        hidewrap();
+        it.action();
+      });
+      menu.appendChild(btn);
+    }
+
+    wrap.hidden = false;
+    requestAnimationFrame(() => placeat(menu, x, y));
+  }
+
+  function showfolderpop({x, y, folderpath}) {
+    const a = api();
+    if (!a || !folderpath) return;
+    openmenu(x, y, [
+      {
+        icon: icons.folder,
+        label: "Open folder",
+        action: () => a.openfolder?.(folderpath)
+      },
+      {
+        icon: icons.link,
+        label: "Copy link",
+        action: () => cliptext(a.sharelink(folderpath))
+      }
+    ]);
+  }
+
   function showpop({x, y, filepath}) {
     const a = api();
     if (!a || !filepath) return;
     const filename = filepath.split("/").pop() || filepath;
     const lb = labels(filename);
-    const wrap = ensurewrap();
-    const menu = wrap.querySelector(".contextmenu");
-    if (!menu) return;
-    menu.innerHTML = "";
 
     const items = [
       {
@@ -189,28 +229,18 @@ export function ctxmenu(get) {
       }
     ];
 
-    for (const it of items) {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "contextmenuitem";
-      btn.setAttribute("role", "menuitem");
-      btn.innerHTML = `<span class="contextmenuicon">${it.icon}</span><span class="contextmenutext"></span>`;
-      btn.querySelector(".contextmenutext").textContent = it.label;
-      btn.addEventListener("click", e => {
-        e.preventDefault();
-        e.stopPropagation();
-        hidewrap();
-        it.action();
-      });
-      menu.appendChild(btn);
-    }
-
-    wrap.hidden = false;
-    requestAnimationFrame(() => placeat(menu, x, y));
+    openmenu(x, y, items);
   }
 
   function showfromev(e, opts = {}) {
     const card = closestcard(e.target);
+    const folderpath = card?.getAttribute?.("data-folderpath") || "";
+    if (folderpath) {
+      e.preventDefault();
+      e.stopPropagation();
+      showfolderpop({x: e.clientX, y: e.clientY, folderpath});
+      return;
+    }
     const filepath = opts.filepath || pathfromcard(card).filepath;
     if (!filepath) return;
     e.preventDefault();
@@ -241,6 +271,8 @@ export function ctxmenu(get) {
       holdtimer = window.setTimeout(() => {
         holdtimer = 0;
         const c = closestcard(holdstart?.target);
+        const folderpath = c?.getAttribute?.("data-folderpath") || "";
+        if (folderpath) {showfolderpop({x: holdstart.x, y: holdstart.y, folderpath}); return}
         const filepath = pathfromcard(c).filepath;
         if (!filepath) return;
         showpop({x: holdstart.x, y: holdstart.y, filepath});

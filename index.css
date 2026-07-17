@@ -398,17 +398,6 @@ li {
     gap: 12px 16px;
 }
 
-.foldercard {
-    display: flex; align-items: center;
-    gap: 8px; padding: 10px;
-    min-height: 34px; background: #1b1b1b;
-    border-radius: 8px; border: 1px solid transparent;
-    cursor: pointer;
-}
-.foldercard:hover {
-    background: #232324;
-}
-
 .name {
     overflow: hidden; text-overflow: ellipsis;
     white-space: nowrap;
@@ -429,6 +418,19 @@ li {
 }
 
 .foldergrid {gap: 16px}
+.folderlist {
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 4px 12px;
+}
+.folderlist .filecard {
+    display: flex; align-items: center;
+    border-radius: 8px;
+}
+.folderlist .thumb {
+    width: 72px; min-width: 72px;
+    aspect-ratio: 1; order: -1;
+}
+.folderlist .filehead {flex: 1}
 .folderthumbgrid {
     position: relative; z-index: 1;
     width: 100%; height: 100%;
@@ -605,7 +607,6 @@ li {
     box-shadow: 0 2px 10px rgba(0,0,0,0.4);
 }
 .mediatoolbar .headericonbutton:hover {background: #2f3031}
-.mediatoolbar .headericonbutton.copied {background: #234534}
 
 .mediaviewport {
     position: relative; display: flex;
@@ -661,12 +662,10 @@ li {
 
 .mediaregion {
     position: absolute;
-    border: 1px solid rgba(255, 193, 7, 0.95);
+    border: 1px solid rgba(255,193,7,0.95);
+    transition: opacity 140ms ease;
 }
-.mediaregion.active {
-    border-color: #00e5a8;
-    box-shadow: 0 0 0 1px rgba(0,229,168,0.65) inset;
-}
+.mediastage.commentfocus .mediaregion:not(.active) {opacity: 0.25}
 
 .mediastage.commentfocus::before {
     content: "";
@@ -783,9 +782,15 @@ li {
 
 .mediacommentsource {
     position: absolute; right: -2px;
-    bottom: -2px; width: 1em; height: auto; 
+    bottom: -2px; width: 1em; height: auto;
     background: black;
     border-radius: 50%;
+}
+
+/* perhaps this could be styled more uniquely? */
+.mediacommentpfpfallback {
+    object-fit: contain;
+    background: #000;
 }
 
 .mediacommentmeta {

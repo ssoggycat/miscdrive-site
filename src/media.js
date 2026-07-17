@@ -268,6 +268,15 @@ export function drivemedia(deps) {
             `</div>` +
             `</div>`;
 
+          const pfpimg = card.querySelector(".mediacommentpfp");
+          if (pfpimg) pfpimg.addEventListener("error", () => {
+            card.querySelector(".mediacommentsource")?.remove();
+            if (badge) {
+              pfpimg.src = badge;
+              pfpimg.classList.add("mediacommentpfpfallback");
+            }
+          }, {once: true});
+
           card.addEventListener("click", e => {
             if (!state.commentsopen) return;
             if (!cid) return;
