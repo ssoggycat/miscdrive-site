@@ -9,10 +9,11 @@ export function ctxmenu(get) {
   const mediacontent = document.querySelector(".mediacontent");
 
   const icons = {
-    preview: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960"><path d="M200-800v241-1 400zv200zm0 720q-33 0-56-23t-24-57v-640q0-33 24-56t56-24h320l240 240v100q-19-8-39-12t-41-7v-41H480v-200H200v640h241q16 24 36 45t44 35zm531-149q29-29 29-71t-29-71-71-29-71 29-29 71 29 71 71 29 71-29M864-40 756-148q-21 14-45 21t-51 7q-75 0-127-52t-53-128 53-127 127-53 128 53 52 127q0 26-7 51t-21 45L920-96z"/></svg>`,
+    newtab: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120zm188-212-56-56 372-372H560v-80h280v280h-80v-144z"/></svg>`,
     download: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960"><path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58zM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160z"/></svg>`,
     copy: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960"><path d="M760-200H320q-33 0-56-23t-24-57v-560q0-33 24-56t56-24h280l240 240v400q0 33-23 57t-57 23M560-640v-200H320v560h440v-360zM160-40q-33 0-56-23t-24-57v-560h80v560h440v80zm160-800v200zv560z"/></svg>`,
-    thumbnail: `<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960"><path d="M539-577.4a183 183 0 0 0-171 115.5c2.6 19.1 16.5 37.1 28.2 52.8A184 184 0 0 0 544-341.5c65-.7 127.6-38.9 157.7-96.5 14.2-16.5 7-35-4.4-51A183 183 0 0 0 539-577.3m1 62.3c40.6-.5 81.4 20.6 102.5 55.6-27.2 45.9-87.2 65.6-137.5 51.2a117 117 0 0 1-68.8-51.2A119 119 0 0 1 540-515m-1 4.4c-32.7-1.4-59.4 34.9-49 65.8 8.2 30.6 47.5 46.7 74.6 30.3 26.6-14.5 34.8-54 14.7-77a51 51 0 0 0-40.3-19"/><path d="M760-200c-149.4-.2-298.8.5-448.1-.4-45.8-3.1-78-49.5-71.9-93.6.2-184.7-.5-369.4.4-554.1 3.1-45.8 49.5-78 93.6-71.9h266l240 240c-.2 136 .5 272-.4 408.1-3 39.6-39.8 73-79.6 71.9M560-640v-200H320v560h440v-360zM160-40c-49 1.8-86.8-47-80-94v-546h80v560h440v80zm160-800v200zv560z"/></svg>`
+    link: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960"><path d="M440-280H280q-83 0-141.5-58.5T80-480q0-83 58.5-141.5T280-680h160v80H280q-50 0-85 35t-35 85q0 50 35 85t85 35h160zM320-440v-80h320v80zm200 160v-80h160q50 0 85-35t35-85q0-50-35-85t-85-35H520v-80h160q83 0 141.5 58.5T880-480q0 83-58.5 141.5T680-280z"/></svg>`,
+    media: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960"><path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120zm0-80h560v-560H200zm40-80h480L570-480 450-320l-90-120zm-40 80v-560z"/></svg>`
   };
 
   function hashpath() {
@@ -45,9 +46,11 @@ export function ctxmenu(get) {
   function labels(filename) {
     const {isimg, isvid} = kindflags(filename);
     return {
-      preview: isvid ? "Preview video" : "Preview image",
+      newtab: isvid ? "Preview video in new tab" : "Preview image in new tab",
       download: isvid ? "Download video" : "Download image",
-      copy: isvid ? "Copy video" : "Copy image"
+      copy: isvid ? "Copy video" : "Copy image",
+      copylink: "Copy link",
+      copymedialink: isvid ? "Copy video link" : "Copy image link"
     };
   }
 
@@ -142,7 +145,15 @@ export function ctxmenu(get) {
     } catch {}
   }
 
-  function showpop({x, y, filepath, inpreview}) {
+  function cliptext(text) {
+    try {navigator.clipboard?.writeText?.(text)?.catch?.(() => {})} catch {}
+  }
+
+  function sharelink(filepath) {
+    return `${location.origin}${location.pathname}${location.search}#${encodeURI(filepath)}`;
+  }
+
+  function showpop({x, y, filepath}) {
     const a = api();
     if (!a || !filepath) return;
     const filename = filepath.split("/").pop() || filepath;
@@ -152,15 +163,12 @@ export function ctxmenu(get) {
     if (!menu) return;
     menu.innerHTML = "";
 
-    const items = [];
-    if (!inpreview) {
-      items.push({
-        icon: icons.preview,
-        label: lb.preview,
-        action: () => a.openlightbox(a.rawurl(filepath), filepath, !!a.videoext?.test?.(filename))
-      });
-    }
-    items.push(
+    const items = [
+      {
+        icon: icons.newtab,
+        label: lb.newtab,
+        action: () => window.open(a.rawurl(filepath), "_blank", "noopener,noreferrer")
+      },
       {
         icon: icons.download,
         label: lb.download,
@@ -174,15 +182,16 @@ export function ctxmenu(get) {
         action: () => clipblob(a.rawurl(filepath), filename, lb.copy, {allowurlfallback: true})
       },
       {
-        icon: icons.thumbnail,
-        label: "Copy thumbnail",
-        action: () => clipblob(
-          a.thumburl(filepath),
-          `${filename.replace(/\.[^.]+$/, "")}.webp`,
-          "Thumbnail", {allowurlfallback: true}
-        )
+        icon: icons.link,
+        label: lb.copylink,
+        action: () => cliptext(sharelink(filepath))
+      },
+      {
+        icon: icons.media,
+        label: lb.copymedialink,
+        action: () => cliptext(a.rawurl(filepath))
       }
-    );
+    ];
 
     for (const it of items) {
       const btn = document.createElement("button");
@@ -210,13 +219,13 @@ export function ctxmenu(get) {
     if (!filepath) return;
     e.preventDefault();
     e.stopPropagation();
-    showpop({x: e.clientX, y: e.clientY, filepath, inpreview: !!opts.inpreview});
+    showpop({x: e.clientX, y: e.clientY, filepath});
   }
 
   if (drivecontent) {
     drivecontent.addEventListener("contextmenu", e => {
       if (!closestcard(e.target)) return;
-      showfromev(e, {inpreview: false});
+      showfromev(e);
     }, {capture: false});
 
     let holdtimer = 0;
@@ -238,7 +247,7 @@ export function ctxmenu(get) {
         const c = closestcard(holdstart?.target);
         const filepath = pathfromcard(c).filepath;
         if (!filepath) return;
-        showpop({x: holdstart.x, y: holdstart.y, filepath,inpreview: false});
+        showpop({x: holdstart.x, y: holdstart.y, filepath});
       }, 520);
     }, {passive: false});
 
@@ -259,7 +268,7 @@ export function ctxmenu(get) {
       if (!filepath) return;
       e.preventDefault();
       e.stopPropagation();
-      showpop({x: e.clientX, y: e.clientY, filepath, inpreview: true});
+      showpop({x: e.clientX, y: e.clientY, filepath});
     }, {capture: false});
   }
 
@@ -267,6 +276,6 @@ export function ctxmenu(get) {
     const d = e?.detail || {};
     const filepath = String(d.filepath || "");
     if (!filepath) return;
-    showpop({x: Number(d.x || 0), y: Number(d.y || 0), filepath,inpreview: false});
+    showpop({x: Number(d.x || 0), y: Number(d.y || 0), filepath});
   });
 }
