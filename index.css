@@ -445,6 +445,8 @@ li {
 }
 .folderthumbgrid.count1 {grid-template-columns: 1fr; grid-template-rows: 1fr}
 .folderthumb:has(.thumbimg:not(.thumbimgpending)) .thumbicon {display: none}
+.foldergrid.thumbsmall .folderthumbgrid {padding: 5px; gap: 3px}
+.foldergrid.thumblarge .folderthumbgrid {padding: 12px; gap: 6px}
 .folderlist .folderthumbgrid {padding: 4px; gap: 2px}
 
 .filecard {
