@@ -175,8 +175,9 @@ export function drivediscord(deps) {
         if (msg.type === "discord_oauth_code" && typeof msg.code === "string" && msg.code) {
           setsetting("discord_code", msg.code);
           updatediscordmenu();
-          resolvediscorduser();
-          if (medialightbox && !medialightbox.hidden) oncomments();
+          resolvediscorduser().then(() => {
+            if (medialightbox && !medialightbox.hidden) oncomments();
+          });
         }
       });
     }

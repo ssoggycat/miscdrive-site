@@ -188,7 +188,7 @@ export function drivemedia(deps) {
         arr.sort((a, b) => Number(a?.id || 0) - Number(b?.id || 0));
       const roots = comments
         .filter(c => !c?.replyingto || !byid.has(String(c.replyingto)))
-        .sort((a, b) => Number(a?.id || 0) - Number(b?.id || 0));
+        .sort((a, b) => Number(b?.id || 0) - Number(a?.id || 0));
 
       let focusedchainroot = null;
       if (activefocuskey) {
@@ -473,7 +473,6 @@ export function drivemedia(deps) {
       activefocuskey = null;
       activeregion = null;
       composerequested = false;
-      if (mediacommentbtn) mediacommentbtn.hidden = !!video;
       const siblings = listchildren(state.cwd)
         .filter(x => x.kind === "file" && (imageext.test(x.name) || videoext.test(x.name)))
         .map(x => ({url: rawurl(x.path), path: x.path, name: x.name}));
@@ -540,6 +539,7 @@ export function drivemedia(deps) {
         renderregions(comments);
       }
 
+      synccommentbtn();
       medialightbox.hidden = false;
       document.body.style.overflow = "hidden";
       requestAnimationFrame(() => medialightbox.classList.add("medialightboxvisible"));
@@ -563,6 +563,10 @@ export function drivemedia(deps) {
       composerequested = false;
       renderregions(lightboxcomments);
       rendercommentpanel(lightboxcomments);
+    }
+
+    function synccommentbtn() {
+      if (mediacommentbtn) mediacommentbtn.hidden = !lightboximg || !getsetting("discord_token", "");
     }
 
     function startcomment() {
@@ -610,6 +614,7 @@ export function drivemedia(deps) {
 
     function refreshcomments() {
       if (!medialightbox || medialightbox.hidden) return;
+      synccommentbtn();
       rendercommentpanel(lightboxcomments);
       renderregions(lightboxcomments);
     }
