@@ -5,7 +5,8 @@ export function zipdl(deps) {
   const rawurl = deps.rawurl;
   const formatbytes = deps.formatbytes;
 
-  const zipbutton = document.querySelector(".zipbutton"),
+  const zipwrap = document.querySelector(".zipwrap"),
+    zipbutton = document.querySelector(".zipbutton"),
     zippanel = document.querySelector(".zippanel"),
     zipname = document.querySelector(".zipname"),
     zipbarfill = document.querySelector(".zipbarfill"),
@@ -154,15 +155,20 @@ export function zipdl(deps) {
   function showpanel() {
     window.clearTimeout(hidetimer);
     zippanel.hidden = false;
+    zipwrap.classList.add("zipping");
   }
   function hidepanel(delay) {
     window.clearTimeout(hidetimer);
-    if (!delay) {zippanel.hidden = true; return}
-    hidetimer = window.setTimeout(() => {zippanel.hidden = true}, delay);
+    const hide = () => {
+      zippanel.hidden = true;
+      zipwrap.classList.remove("zipping");
+    };
+    if (!delay) {hide(); return}
+    hidetimer = window.setTimeout(hide, delay);
   }
   function setrunning(on) {
-    zipbutton.classList.toggle("zipactive", on);
-    zipbutton.title = on ? "cancel zip download" : "download everything as zip";
+    zippanel.classList.toggle("zipactive", on);
+    zippanel.title = on ? "click to cancel" : "";
   }
   function paint(name, done, total, bytes, failed) {
     if (name !== null) zipname.textContent = name;
@@ -237,8 +243,11 @@ export function zipdl(deps) {
     }
   }
 
+  zippanel.addEventListener("click", () => {
+    if (ctrl) ctrl.abort();
+  });
   zipbutton.addEventListener("click", async () => {
-    if (ctrl) {ctrl.abort(); return}
+    if (ctrl) return;
     const files = (state.tree || []).filter(x => x.type === "blob");
     if (!files.length) {
       showpanel();
@@ -254,7 +263,7 @@ export function zipdl(deps) {
     paint("starting..", 0, files.length, 0, 0);
     try {
       const result = await run(files, ctrl.signal);
-      zipname.textContent = "done!";
+      zipname.textContent = "done! check the zip file.";
       zipbarfill.style.width = "100%";
       zipstats.textContent =
         `${result.done - result.failed}/${result.done} files - ${formatbytes(result.totalbytes) || "0 B"}` +
