@@ -6,6 +6,7 @@ import {drivetree} from "./filetree.js";
 import {drivediscord} from "./login.js";
 import {drivemedia} from "./media.js";
 import {ctxmenu} from "./contextmenu.js";
+import {zipdl} from "./zip.js";
 
 const rootprefix = "soggy cat";
 const cachekey = "sogtree";
@@ -617,6 +618,7 @@ ctxmenu(() => pub);
 
 syncback();
 readmebtn();
+zipdl({state, rawurl, formatbytes});
 setcomments(getsetting("commentson", 0) === 1);
 setthumbsize(getsetting("thumbsize", "m"), false);
 setview(getsetting("viewmode", "grid") === "list");

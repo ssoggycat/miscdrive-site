@@ -29,7 +29,7 @@ function extname(name) {
 function formatbytes(bytes) {
   const n = Number(bytes);
   if (!Number.isFinite(n) || n < 0) return "";
-  if (n < 1024) return `${Math.round(n)} B`;
+  if (n < 1024) return `${Math.round(n)}b`;
   const units = ["kb", "mb", "gb", "tb"];
   let v = n / 1024; let idx = 0;
   while (v >= 1024 && idx < units.length - 1) {v /= 1024; idx++}

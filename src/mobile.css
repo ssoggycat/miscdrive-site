@@ -20,4 +20,8 @@
         pointer-events: auto !important; background: #131314;
     }
     .goog.readmeopen .readmeclose {display: inline-grid}
+
+    .zipwrap {right: 12px; bottom: 12px}
+    .zipbutton {width: 46px; height: 46px}
+    .zippanel {width: min(264px, calc(100vw - 24px))}
 }

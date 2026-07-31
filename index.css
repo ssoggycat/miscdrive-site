@@ -874,3 +874,46 @@ li {
 .discordlogout:hover {
     background: rgba(138,180,248,0.14);
 }
+
+/*//////////////////////////////////////////////////////////////////////*/
+
+.zipwrap {
+    position: fixed; right: 18px;
+    bottom: 18px; z-index: 500;
+    display: flex; flex-direction: column;
+    align-items: flex-end; gap: 10px;
+}
+.zipbutton {
+    width: 52px; height: 52px;
+    border-radius: 50%; border: none;
+    background: #1b1b1b; cursor: pointer;
+    display: grid; place-items: center;
+}
+.zipbutton:hover {background: #232323}
+.zipbutton.zipactive {
+    border-color: rgba(138,180,248,0.5);
+    background: rgba(138,180,248,0.08);
+}
+.zippanel {
+    width: 264px; padding: 10px 12px;
+    background: #1b1b1b; border: none;
+    border-radius: 10px;
+}
+.zipname {
+    color: #e6e6e6; font-size: 0.85em;
+    white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis;
+}
+.zipbar {
+    margin-top: 6px; height: 3px;
+    background: rgba(255,255,255,0.08); border-radius: 3px;
+    overflow: hidden;
+}
+.zipbarfill {
+    height: 100%; width: 0%;
+    background: #8ab4f8;
+}
+.zipstats {
+    margin-top: 5px; color: #9aa0a6;
+    font-size: 0.8em;
+}
