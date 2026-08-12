@@ -179,7 +179,7 @@ export function zipdl(deps) {
   }
 
   async function run(files, signal) {
-    const sink = await makesink("soggy cat.zip");
+    const sink = await makesink("other cats.zip");
     const dt = dosdatetime();
     const entries = [];
     const lookahead = 4;
