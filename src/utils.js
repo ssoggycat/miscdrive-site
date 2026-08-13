@@ -37,6 +37,11 @@ function formatbytes(bytes) {
   while (v >= 1024 && idx < units.length - 1) {v /= 1024; idx++}
   return `${v.toFixed(v >= 10 ? 1 : 2)} ${units[idx]}`;
 }
+function formatfoldersize(bytes) {
+  const n = Number(bytes);
+  if (!Number.isFinite(n) || n <= 0) return "";
+  return `${(n / (1024 * 1024)).toFixed(1)} mb`;
+}
 function formattimecompact(sec) {
   const n = Number(sec);
   if (!Number.isFinite(n) || n <= 0) return "";
@@ -71,7 +76,7 @@ function sharelink(path) {
 
 export const drive = {
   audioext, basename, esc, extname,
-  formatbytes, formattimecompact,
+  formatbytes, formatfoldersize, formattimecompact,
   iconfor, imageext, norm,
   rawurl, sharelink, svg, thumburl, videoext
 };
