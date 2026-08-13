@@ -18,7 +18,6 @@ export function drivemedia(deps) {
     const sethash = deps.sethash;
     const hidehint = deps.hidehint;
 
-    const commentsindexapi = deps.commentsindexapi;
     const commentslivebase = deps.commentslivebase;
 
     const medialightbox = deps.medialightbox;
@@ -34,9 +33,8 @@ export function drivemedia(deps) {
     const mediacommentbtn = deps.mediacommentbtn;
 
     const commentscache = new Map();
-    let commentsindexpromise = null;
-    let commentsindexbyfile = null;
     let lightboxfilename = "";
+    let lightboxhash = "";
     let lightboxpath = "";
     let lightboxcomments = [];
     let lightboximg = null;
@@ -79,47 +77,28 @@ export function drivemedia(deps) {
         meta.map(x => `<div class="mediainfometa">${esc(x)}</div>`).join("");
     }
 
-    async function loadcommentsindex() {
-      if (commentsindexbyfile) return commentsindexbyfile;
-      if (!commentsindexpromise) {
-        commentsindexpromise = (async () => {
-          let j = null;
-          try {
-            const res = await fetch(commentsindexapi, {cache: "force-cache"});
-            if (res.ok) j = await res.json();
-          } catch (_) {}
-          const files = Array.isArray(j?.files) ? j.files : [];
-          const map = new Map();
-          for (const f of files) {
-            if (typeof f?.basename === "string")
-              map.set(f.basename, Array.isArray(f?.comments) ? f.comments : []);
-          }
-          return map;
-        })().catch(() => new Map());
-      }
-      commentsindexbyfile = await commentsindexpromise;
-      return commentsindexbyfile;
+    function commentscachekey(hash, filename) {
+      return hash ? `h:${hash}` : `f:${filename}`;
     }
-
-    /*//////////////////////////////////////////////////////////////////////*/
-
-    async function fetchlivecomments(filename) {
-      if (!commentslivebase || !filename) return [];
+    async function fetchlivecomments(hash, filename) {
+      if (!commentslivebase || (!hash && !filename)) return [];
       try {
-        const res = await fetch(`${commentslivebase}/comments?file=${encodeURIComponent(filename)}`, {cache: "no-store"});
+        const qs = new URLSearchParams();
+        if (hash) qs.set("hash", hash);
+        if (filename) qs.set("file", filename);
+        const res = await fetch(`${commentslivebase}/comments?${qs.toString()}`, {cache: "no-store"});
         if (!res.ok) return [];
         const j = await res.json();
         return Array.isArray(j?.comments) ? j.comments : [];
       } catch {return []}
     }
-    async function fetchcomments(filename) {
-      if (!filename) return [];
-      if (commentscache.has(filename)) return commentscache.get(filename);
+    async function fetchcomments(hash, filename) {
+      if (!hash && !filename) return [];
+      const cachekey = commentscachekey(hash, filename);
+      if (commentscache.has(cachekey)) return commentscache.get(cachekey);
       try {
-        const idx = await loadcommentsindex();
-        const archived = idx.get(filename) || [];
-        const live = await fetchlivecomments(filename);
-        const rows = [...archived, ...live]
+        const live = await fetchlivecomments(hash, filename);
+        const rows = live
           .map(c => {
             const replyingto = (typeof c?.replyingto === "string" && c.replyingto) ? c.replyingto : null;
             const region = Array.isArray(c?.region) && c.region.length === 4 ? c.region.map(Number) : null;
@@ -127,7 +106,7 @@ export function drivemedia(deps) {
             return {...c, replyingto, region, replyid};
           })
           .sort((a, b) => Number(a?.id || 0) - Number(b?.id || 0));
-        commentscache.set(filename, rows);
+        commentscache.set(cachekey, rows);
         return rows;
       } catch {return []}
     }
@@ -305,6 +284,7 @@ export function drivemedia(deps) {
               try {
 
                 const body = {
+                  hash: lightboxhash || null,
                   file: lightboxfilename,
                   text, token,
                   replyingto: activereplyto || null,
@@ -321,8 +301,8 @@ export function drivemedia(deps) {
                   activefocuskey = null;
                   activeregion = null;
                   composerequested = false;
-                  commentscache.delete(lightboxfilename);
-                  const refreshed = await fetchcomments(lightboxfilename);
+                  commentscache.delete(commentscachekey(lightboxhash, lightboxfilename));
+                  const refreshed = await fetchcomments(lightboxhash, lightboxfilename);
                   lightboxcomments = refreshed;
                   rendercommentpanel(refreshed);
                   renderregions(refreshed);
@@ -356,6 +336,7 @@ export function drivemedia(deps) {
           postbtn.disabled = true;
           try {
             const body = {
+              hash: lightboxhash || null,
               file: lightboxfilename,
               text, token,
               replyingto: activereplyto || null,
@@ -368,8 +349,8 @@ export function drivemedia(deps) {
             if (res.ok) {
               activereplyto = null; activefocuskey = null;
               activeregion = null; composerequested = false;
-              commentscache.delete(lightboxfilename);
-              const refreshed = await fetchcomments(lightboxfilename);
+              commentscache.delete(commentscachekey(lightboxhash, lightboxfilename));
+              const refreshed = await fetchcomments(lightboxhash, lightboxfilename);
               lightboxcomments = refreshed;
               rendercommentpanel(refreshed);
               renderregions(refreshed);
@@ -470,6 +451,7 @@ export function drivemedia(deps) {
       updatemediainfo(pathname);
       const filename = pathname.split("/").pop() || "";
       lightboxfilename = filename;
+      lightboxhash = state.tree.find(x => x.type === "blob" && x.path === pathname)?.sha || "";
       lightboxpath = pathname;
       sethash(pathname);
       activereplyto = null;
@@ -529,7 +511,7 @@ export function drivemedia(deps) {
         img.alt = "";
         mediacontent.appendChild(img);
         lightboximg = img;
-        const comments = await fetchcomments(filename);
+        const comments = await fetchcomments(lightboxhash, filename);
         lightboxcomments = comments;
         if (medicomments) medicomments.hidden = !state.commentsopen;
         rendercommentpanel(comments);
@@ -598,6 +580,7 @@ export function drivemedia(deps) {
         if (medicomments) medicomments.hidden = true;
 
         lightboxfilename = "";
+        lightboxhash = "";
         lightboxpath = "";
         lightboxcomments = [];
         lightboximg = null;
