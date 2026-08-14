@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MANAGE your cat!! big business</title>
+
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="src/manage.css" />
+
+  </head>
+  <body>
+    <div class="managepage">
+      <header class="manageheader">
+        <h1>manage files</h1>
+        <div class="managelogin">
+          <button type="button" class="discordavatarbutton headericonbutton">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#aac1f0" viewBox="0 -960 960 960">
+              <path d="M480-481q66 0 113-47t47-113-47-113-113-47-113 47-47 113 47 113 113 47M160-160v-94q0-38 19-65t49-41q67-30 128.5-45T480-420t123.5 15.5T732-360q31 14 49.5 41t18.5 65v94z"/>
+            </svg>
+          </button>
+          <div class="discordmenu" hidden>
+            <div class="discordmenuavatar"></div>
+            <div class="discordmenuname"></div>
+            <button type="button" class="discordmenulogout">log out</button>
+          </div>
+        </div>
+      </header>
+      <main class="managemain">
+        <div class="managestatus">log in with discord to manage your folder</div>
+        <div class="managefolders" hidden></div>
+      </main>
+    </div>
+    <script type="module" src="src/manage.js"></script>
+  </body>
+</html>
