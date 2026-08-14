@@ -55,15 +55,18 @@ export function drivetree(deps) {
     }
 
     async function fetchtreemirror(forcerefresh) {
-      const [images, videos] = await Promise.all([
+      const [images, videos, docs] = await Promise.all([
         mirrorfetchjson("images.json", forcerefresh),
-        mirrorfetchjson("videos.json", forcerefresh)
+        mirrorfetchjson("videos.json", forcerefresh),
+        mirrorfetchjson("docs.json", forcerefresh).catch(() => [])
       ]);
       const imgrows = Array.isArray(images) ? images : [];
       const vidrows = Array.isArray(videos) ? videos : [];
+      const docrows = Array.isArray(docs) ? docs : [];
       const blobs = [];
       for (const row of imgrows) pushmirrorrow(blobs, row);
       for (const row of vidrows) pushmirrorrow(blobs, row);
+      for (const row of docrows) pushmirrorrow(blobs, row);
       return {tree: blobs, branch: "mirror", truncated: false};
     }
 
