@@ -65,6 +65,13 @@ function thumburl(path) {
   const noext = p.replace(/\.[^.]+$/, "");
   return `${cdnbase}/webp/${encpath(noext)}.webp`;
 }
+// much smaller/heavier-compressed tier (~220px, q45) for dense grids like the manage
+// page, where the full 1024px webp tier is overkill and wastes real bandwidth
+function thumburlsmall(path) {
+  const p = String(path || "").replace(/\\/g, "/");
+  const noext = p.replace(/\.[^.]+$/, "");
+  return `${cdnbase}/webp-small/${encpath(noext)}.webp`;
+}
 function iconfor(name) {
   if (imageext.test(name)) return svg.image;
   if (videoext.test(name)) return svg.video;
@@ -79,5 +86,5 @@ export const drive = {
   audioext, basename, esc, extname,
   formatbytes, formatfoldersize, formattimecompact,
   iconfor, imageext, norm,
-  rawurl, sharelink, svg, thumburl, videoext
+  rawurl, sharelink, svg, thumburl, thumburlsmall, videoext
 };

@@ -4,7 +4,7 @@ import {drive} from "./utils.js";
 import {drivediscord} from "./login.js";
 import {drivemedia} from "./media.js";
 
-const {esc, basename, extname, formatbytes, formattimecompact, iconfor, imageext, videoext, audioext, rawurl, thumburl} = drive;
+const {esc, basename, extname, formatbytes, formattimecompact, iconfor, imageext, videoext, audioext, rawurl, thumburlsmall} = drive;
 const managebase = "https://api.soggy.cat";
 
 const discordmenu = document.querySelector(".discordmenu"),
@@ -230,13 +230,18 @@ async function renderfolder(folder) {
       card.className = "managecard";
       const isvid = videoext.test(f.name);
       card.innerHTML = `
-        <input type="checkbox" class="managecardcheck">
-        <img class="managethumb" src="${esc(thumburl(path))}" alt="" loading="lazy">
-        ${isvid ? `<div class="managecardvidicon">${iconfor(f.name)}</div>` : ""}
-        <div class="managecardhover">
+        <div class="managethumbwrap">
+          <input type="checkbox" class="managecardcheck">
+          <img class="managethumb" src="${esc(thumburlsmall(path))}" alt="" loading="lazy">
+          ${isvid ? `<div class="managecardvidicon">${iconfor(f.name)}</div>` : ""}
+        </div>
+        <div class="managecardinfo">
           <span class="managecardname" title="${esc(f.name)}">${esc(f.name)}</span>
           <span class="managecardmeta">${esc(fmtbytes(f.size))}</span>
-          <button type="button" class="managerenamebtn" title="rename">rename</button>
+          <div class="managecardactions">
+            <button type="button" class="managerenamebtn" title="rename">rename</button>
+            <button type="button" class="managedeletebtn" title="delete">delete</button>
+          </div>
         </div>
       `;
       const check = card.querySelector(".managecardcheck");
@@ -255,7 +260,16 @@ async function renderfolder(folder) {
         if (!r.ok) {alert(`rename failed: ${r.body?.error || r.status}`); card.style.opacity = ""; return}
         refresh();
       });
-      card.addEventListener("click", () => {
+      card.querySelector(".managedeletebtn").addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (!window.confirm(`delete ${f.name}? this can't be undone from here.`)) return;
+        card.style.opacity = "0.5";
+        const r = await apipost("/manage/delete", {folder, filename: f.name});
+        if (!r.ok) {alert(`delete failed: ${r.body?.error || r.status}`); card.style.opacity = ""; return}
+        refresh();
+      });
+      card.addEventListener("click", (e) => {
+        if (e.target.closest(".managethumbwrap") === null) return;
         if (selected.size > 0) {
           check.checked = !check.checked;
           check.dispatchEvent(new Event("click", {bubbles: false}));
