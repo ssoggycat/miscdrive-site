@@ -377,26 +377,36 @@ const {mdtohtml, showmddoc} = mdhelper({
   setsetting, esc
 });
 
-// .readme.md / readme.md in any folder adds an additional one to the top of file list
+// .readme.md / readme.md in any folder adds an additional one to the top of file list.
+function findfolderreadme(folder) {
+  const prefix = folder ? `${folder}/` : "";
+  for (const x of state.tree) {
+    if (x.type !== "blob" || !x.path.startsWith(prefix)) continue;
+    const rel = x.path.slice(prefix.length);
+    if (!rel || rel.includes("/")) continue;
+    if (/^\.?readme\.md$/i.test(rel)) return x.path;
+  }
+  return null;
+}
 let lastreadmefolder = null;
 const folderreadmecache = new Map();
 async function syncfolderreadme() {
   if (!folderreadme) return;
   if (state.cwd === lastreadmefolder) return;
   lastreadmefolder = state.cwd;
-  const hit = tree.listchildren(state.cwd).find(x => x.kind === "file" && /^readme\.md$/i.test(x.name));
-  if (!hit) {
+  const hitpath = findfolderreadme(state.cwd);
+  if (!hitpath) {
     folderreadme.hidden = true;
     folderreadme.innerHTML = "";
     return;
   }
   const forfolder = state.cwd;
   try {
-    let txt = folderreadmecache.get(hit.path);
+    let txt = folderreadmecache.get(hitpath);
     if (txt === undefined) {
-      const res = await fetch(rawurl(hit.path), {cache: "force-cache"});
+      const res = await fetch(rawurl(hitpath), {cache: "force-cache"});
       txt = res.ok ? await res.text() : "";
-      folderreadmecache.set(hit.path, txt);
+      folderreadmecache.set(hitpath, txt);
     }
     if (state.cwd !== forfolder) return; // navigated away while fetching
     if (!txt) {folderreadme.hidden = true; folderreadme.innerHTML = ""; return}

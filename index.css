@@ -803,6 +803,11 @@ li {
     overflow: auto;
 }
 
+.mediacommentsempty {
+    color: #9aa0a6; font-size: 13px;
+    text-align: center; padding: 18px 10px;
+}
+
 /*//////////////////////////////////////////////////////////////////////*/
 
 .commentcompose {

@@ -31,8 +31,14 @@ export function drivetree(deps) {
 
     const cdnbase = "https://misc-cdn.soggy.cat";
 
-    async function mirrorfetchjson(path) {
-      const res = await fetch(`${cdnbase}/${path}`, {cache: "force-cache"});
+    function isinfrafile(path) {
+      if (path.includes("/")) return false;
+      return /^cname$/i.test(path) || /^\.?readme\.md$/i.test(path) || /^\.nojekyll$/i.test(path);
+    }
+
+    async function mirrorfetchjson(path, bust) {
+      const url = bust ? `${cdnbase}/${path}?t=${Date.now()}` : `${cdnbase}/${path}`;
+      const res = await fetch(url, {cache: bust ? "no-store" : "default"});
       if (!res.ok) throw new Error(`mirror fetch failed (${res.status})`);
       return await res.json();
     }
@@ -41,17 +47,17 @@ export function drivetree(deps) {
       const name = typeof row === "string" ? row : row?.path;
       if (typeof name !== "string" || !name.trim()) return;
       const p = name.replace(/^\/+/, "");
-      if (!p || p.includes("..")) return;
+      if (!p || p.includes("..") || isinfrafile(p)) return;
       const blob = {type: "blob", path: p};
       if (typeof row?.sha === "string" && row.sha) blob.sha = row.sha;
       if (Number.isFinite(row?.size)) blob.size = row.size;
       blobs.push(blob);
     }
 
-    async function fetchtreemirror() {
+    async function fetchtreemirror(forcerefresh) {
       const [images, videos] = await Promise.all([
-        mirrorfetchjson("images.json"),
-        mirrorfetchjson("videos.json")
+        mirrorfetchjson("images.json", forcerefresh),
+        mirrorfetchjson("videos.json", forcerefresh)
       ]);
       const imgrows = Array.isArray(images) ? images : [];
       const vidrows = Array.isArray(videos) ? videos : [];
@@ -74,7 +80,8 @@ export function drivetree(deps) {
       const filtered = (Array.isArray(tree.tree) ? tree.tree : [])
         .filter((x) => !rootprefix || x.path === rootprefix || x.path.startsWith(`${rootprefix}/`))
         .map((x) => ({...x, path: rootprefix ? x.path.slice(`${rootprefix}/`.length) : x.path}))
-        .filter((x) => x.path && !x.path.split("/").some((seg) => seg.startsWith(".")));
+        .filter((x) => x.path && !x.path.split("/").some((seg) => seg.startsWith(".")))
+        .filter((x) => !isinfrafile(x.path));
       return {tree: filtered, branch: state.branch, truncated: !!tree.truncated};
     }
 
@@ -127,7 +134,7 @@ export function drivetree(deps) {
       const stoploading = startloading();
       try {
         let fresh = null;
-        try {fresh = await fetchtreemirror()} catch (_) {}
+        try {fresh = await fetchtreemirror(forcerefresh)} catch (_) {}
         if (!fresh) fresh = await fetchtreefresh();
         stoploading();
         state.tree = fresh.tree;
