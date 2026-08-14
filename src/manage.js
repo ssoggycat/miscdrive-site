@@ -437,7 +437,10 @@ function synclogindisplay() {
 discord.wireui({medialightbox: null, oncomments: () => {}});
 synclogindisplay();
 discord.handlediscordoauthcallbackifpresent();
-if (manageloginbtn) manageloginbtn.addEventListener("click", () => discord.opendiscordpopup());
+
+if (manageloginbtn) manageloginbtn.addEventListener("click", () => {
+  location.href = discord.discordauthurl(`${location.origin}${location.pathname}`);
+});
 if (discordmenulogout) discordmenulogout.addEventListener("click", synclogindisplay);
 
 if (!(window.opener && window.opener !== window) && !getsetting("discord_token", "")) {

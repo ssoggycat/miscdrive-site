@@ -53,9 +53,9 @@ export function drivediscord(deps) {
       updatediscordmenu();
       hidehint();
     }
-    function discordauthurl() {
+    function discordauthurl(redirectoverride) {
       const base = "https://discord.com/oauth2/authorize";
-      const redirect = `${location.origin}/index.html`;
+      const redirect = redirectoverride || `${location.origin}/index.html`;
       const st = Math.random().toString(16).slice(2) + Math.random().toString(16).slice(2);
       setsetting("discord_oauth_state", st);
       setsetting("discord_oauth_redirect", redirect);
@@ -68,8 +68,8 @@ export function drivediscord(deps) {
       });
       return `${base}?${qs.toString()}`;
     }
-    function opendiscordpopup() {
-      const url = discordauthurl();
+    function opendiscordpopup(redirectoverride) {
+      const url = discordauthurl(redirectoverride);
       const w = 480, h = 720;
       const left = Math.max(0, Math.floor((window.screen.width - w) / 2));
       const top = Math.max(0, Math.floor((window.screen.height - h) / 2));
