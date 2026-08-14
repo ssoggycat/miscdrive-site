@@ -31,12 +31,27 @@ function getsetting(key, fallback) {
   return s[key] === undefined ? fallback : s[key];
 }
 
+const staticbuttonicon = discordavatarbutton ? discordavatarbutton.innerHTML : "";
+function syncavatarbutton() {
+  discord.updatediscordavatar();
+}
+if (discordavatarbutton) {
+  const avatarobserver = new MutationObserver(() => {
+    if (discordavatarbutton.innerHTML !== staticbuttonicon) {
+      avatarobserver.disconnect();
+      discordavatarbutton.innerHTML = staticbuttonicon;
+      avatarobserver.observe(discordavatarbutton, {childList: true, subtree: true});
+    }
+  });
+  avatarobserver.observe(discordavatarbutton, {childList: true, subtree: true});
+}
+
 const discord = drivediscord({
   esc, setsetting, getsetting,
   commentslivebase: managebase, loginhint: null,
   discordavatarbutton, discordmenu,
   discordmenuavatar, discordmenuname,
-  discordmenulogout, pfpdefault: "",
+  discordmenulogout, pfpdefault: staticbuttonicon,
   hidehint: () => {}
 });
 
@@ -232,8 +247,12 @@ async function loadmanager() {
   const folders = Array.isArray(res.body?.folders) ? res.body.folders : [];
   if (res.body?.isadmin) renderadmin();
   else manageadmin.hidden = true;
+  if (res.body?.githuberror) {
+    managestatus.textContent = `github api error (status ${res.body.githuberror.status}): ${res.body.githuberror.body?.message || JSON.stringify(res.body.githuberror.body)}`;
+  }
   if (!folders.length) {
-    managestatus.textContent = "you're logged in but not set up to manage any folder here yet, ask cv to get added";
+    if (!res.body?.githuberror)
+      managestatus.textContent = "you're logged in but not set up to manage any folder here yet, ask cv to get added";
     managefolders.hidden = true;
     return;
   }
@@ -244,10 +263,11 @@ async function loadmanager() {
 }
 
 discord.wireui({medialightbox: null, oncomments: () => {}});
-discord.updatediscordavatar();
+syncavatarbutton();
 discord.handlediscordoauthcallbackifpresent();
-if (!(window.opener && window.opener !== window)) {
+if (!(window.opener && window.opener !== window) && !getsetting("discord_token", "")) {
   discord.resolvediscorduser().then(loadmanager);
+} else {
+  loadmanager();
 }
-loadmanager();
-window.addEventListener("message", () => window.setTimeout(loadmanager, 300));
+window.addEventListener("message", () => window.setTimeout(() => {syncavatarbutton(); loadmanager()}, 300));
