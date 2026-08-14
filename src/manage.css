@@ -10,10 +10,15 @@
     display: flex; align-items: center;
     justify-content: space-between;
     margin-bottom: 16px;
+    padding-right: 220px;
 }
 .manageheader h1 {font-size: 18px; margin: 0}
 
-.manageheaderactions {display: flex; align-items: center; gap: 10px}
+.manageheaderactions {
+    display: flex; align-items: center; gap: 10px;
+    position: fixed; top: 14px; right: 20px;
+    z-index: 200;
+}
 
 .managewhitelistbtn {
     background: transparent; border: none;
@@ -43,7 +48,13 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-.managefolder {margin-bottom: 28px}
+.managefolders {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 12px 24px; align-items: start;
+}
+
+.managefolder {margin-bottom: 0}
 .managefolderhead {
     display: flex; align-items: center; gap: 12px;
     margin-bottom: 10px; flex-wrap: wrap;
@@ -154,7 +165,7 @@
 .manageoverlaybox {
     position: relative; z-index: 1;
     background: #1b1b1b; border-radius: 12px;
-    width: min(560px, 92vw); max-height: 82vh;
+    width: min(1200px, 95vw); max-height: 95vh;
     overflow: auto; padding: 20px;
 }
 .manageoverlayhead {
@@ -164,9 +175,16 @@
 .manageoverlayhead h2 {font-size: 16px; margin: 0}
 .manageoverlayclose {background: transparent; border: none; cursor: pointer; padding: 4px}
 
+.adminpeoplelist {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 8px;
+    align-items: start;
+}
+
 .adminrow {
     background: #111; border-radius: 8px;
-    padding: 10px; margin-bottom: 8px;
+    padding: 10px; margin-bottom: 0;
 }
 .adminrowtop {
     display: flex; gap: 8px;
