@@ -2,18 +2,37 @@
 
 import {drive} from "./utils.js";
 import {drivediscord} from "./login.js";
+import {drivemedia} from "./media.js";
 
-const {esc, thumburl} = drive;
+const {esc, basename, extname, formatbytes, formattimecompact, iconfor, imageext, videoext, audioext, rawurl, thumburl} = drive;
 const managebase = "https://api.soggy.cat";
 
-const discordavatarbutton = document.querySelector(".discordavatarbutton"),
-  discordmenu = document.querySelector(".discordmenu"),
+const discordmenu = document.querySelector(".discordmenu"),
   discordmenuavatar = document.querySelector(".discordmenuavatar"),
   discordmenuname = document.querySelector(".discordmenuname"),
   discordmenulogout = document.querySelector(".discordmenulogout"),
+  manageloginbtn = document.querySelector(".managelogin"),
+  managewhitelistbtn = document.querySelector(".managewhitelistbtn"),
   managestatus = document.querySelector(".managestatus"),
+  managefolders = document.querySelector(".managefolders"),
+  manageoverlay = document.querySelector(".manageoverlay"),
+  manageoverlayclose = document.querySelector(".manageoverlayclose"),
   manageadmin = document.querySelector(".manageadmin"),
-  managefolders = document.querySelector(".managefolders");
+  medialightbox = document.querySelector(".medialightbox"),
+  mediabackdrop = document.querySelector(".mediabackdrop"),
+  mediaclose = document.querySelector(".mediaclose"),
+  mediacontent = document.querySelector(".mediacontent"),
+  medianavleft = document.querySelector(".medianavleft"),
+  medianavright = document.querySelector(".medianavright"),
+  mediaregionlayer = document.querySelector(".mediaregionlayer"),
+  mediatoolbar = document.querySelector(".mediatoolbar"),
+  mediadownload = document.querySelector(".mediadownload"),
+  mediacopylink = document.querySelector(".mediacopylink"),
+  mediacopyimagelink = document.querySelector(".mediacopyimagelink"),
+  mediacommentbtn = document.querySelector(".mediacommentbtn"),
+  medicomments = document.querySelector(".mediacomments"),
+  medicommentslist = document.querySelector(".mediacommentslist"),
+  mediainfo = document.querySelector(".mediainfo");
 
 function loadsettings() {
   try {
@@ -31,28 +50,94 @@ function getsetting(key, fallback) {
   return s[key] === undefined ? fallback : s[key];
 }
 
-const staticbuttonicon = discordavatarbutton ? discordavatarbutton.innerHTML : "";
-function syncavatarbutton() {
-  discord.updatediscordavatar();
-}
-if (discordavatarbutton) {
-  const avatarobserver = new MutationObserver(() => {
-    if (discordavatarbutton.innerHTML !== staticbuttonicon) {
-      avatarobserver.disconnect();
-      discordavatarbutton.innerHTML = staticbuttonicon;
-      avatarobserver.observe(discordavatarbutton, {childList: true, subtree: true});
-    }
-  });
-  avatarobserver.observe(discordavatarbutton, {childList: true, subtree: true});
-}
-
 const discord = drivediscord({
   esc, setsetting, getsetting,
   commentslivebase: managebase, loginhint: null,
-  discordavatarbutton, discordmenu,
+  discordavatarbutton: null, discordmenu,
   discordmenuavatar, discordmenuname,
-  discordmenulogout, pfpdefault: staticbuttonicon,
+  discordmenulogout, pfpdefault: "",
   hidehint: () => {}
+});
+
+const state = {tree: [], cwd: "", commentsopen: true};
+const folderfiles = new Map();
+function synctree() {
+  const items = [];
+  for (const [folder, files] of folderfiles) {
+    for (const f of files) items.push({type: "blob", path: `${folder}/${f.name}`, sha: f.sha, size: f.size});
+  }
+  state.tree = items;
+}
+function listchildren(prefix) {
+  const files = folderfiles.get(prefix) || [];
+  return files.map((f) => ({kind: "file", name: f.name, path: `${prefix}/${f.name}`}));
+}
+
+const media = drivemedia({
+  state, getsetting, setsetting,
+  esc, basename, extname,
+  formatbytes, formattimecompact,
+  imageext, videoext, audioext,
+  rawurl, listchildren,
+  sethash: () => {}, hidehint: () => {},
+  commentslivebase: managebase,
+  medialightbox, mediabackdrop, mediaclose,
+  mediacontent, medianavleft, medianavright, mediaregionlayer,
+  medicomments, medicommentslist, mediainfo, mediacommentbtn
+});
+
+if (mediaclose) mediaclose.addEventListener("click", media.closelightbox);
+if (mediabackdrop) mediabackdrop.addEventListener("click", () => {
+  if (media.hasfocus()) media.clearcommentfocus();
+  else media.closelightbox();
+});
+{
+  const box = document.querySelector(".mediabox");
+  if (box) box.addEventListener("click", (e) => {
+    if (!medialightbox || medialightbox.hidden) return;
+    const t = e.target;
+    if (mediacontent?.contains(t) || medicomments?.contains(t) || mediaregionlayer?.contains(t)) return;
+    if (mediatoolbar?.contains?.(t) || mediainfo?.contains?.(t)) return;
+    if (medianavleft?.contains?.(t) || medianavright?.contains?.(t)) return;
+    if (media.hasfocus()) {media.clearcommentfocus(); return}
+    media.closelightbox();
+  });
+}
+if (mediadownload) mediadownload.addEventListener("click", async () => {
+  const p = media.currentpath();
+  if (!p) return;
+  const url = rawurl(p);
+  try {
+    const res = await fetch(url, {cache: "force-cache"});
+    if (!res.ok) throw new Error(`fetch failed (${res.status})`);
+    const blob = await res.blob();
+    const objurl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = objurl;
+    a.rel = "noopener noreferrer";
+    a.download = basename(p) || "file";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.setTimeout(() => URL.revokeObjectURL(objurl), 30_000);
+  } catch {window.open(url, "_blank", "noopener,noreferrer")}
+});
+if (mediacopylink) mediacopylink.addEventListener("click", () => {
+  const p = media.currentpath();
+  if (p) try {navigator.clipboard?.writeText?.(location.href)} catch (_) {}
+});
+if (mediacopyimagelink) mediacopyimagelink.addEventListener("click", () => {
+  const p = media.currentpath();
+  if (p) try {navigator.clipboard?.writeText?.(rawurl(p))} catch (_) {}
+});
+if (mediacommentbtn) mediacommentbtn.addEventListener("click", () => media.startcomment());
+if (medianavleft) medianavleft.addEventListener("click", () => media.steplightboximage(-1));
+if (medianavright) medianavright.addEventListener("click", () => media.steplightboximage(1));
+document.addEventListener("keydown", (e) => {
+  if (!medialightbox || medialightbox.hidden) return;
+  if (e.key === "Escape") {media.closelightbox(); return}
+  if (e.key === "ArrowLeft") {media.steplightboximage(-1); return}
+  if (e.key === "ArrowRight") {media.steplightboximage(1); return}
 });
 
 function fmtbytes(n) {
@@ -89,48 +174,80 @@ async function apipost(path, payload) {
   return {ok: res.ok, status: res.status, body};
 }
 
+/*//////////////////////////////////////////////////////////////////////*/
+
 async function renderfolder(folder) {
   const section = document.createElement("section");
   section.className = "managefolder";
   section.innerHTML = `
-    <h2 class="managefoldertitle">${esc(folder)}</h2>
+    <div class="managefolderhead">
+      <h2 class="managefoldertitle">${esc(folder)}</h2>
+      <div class="manageselectbar" hidden>
+        <span class="manageselectcount"></span>
+        <button type="button" class="manageselectdeletebtn">delete selected</button>
+        <button type="button" class="manageselectclearbtn">cancel</button>
+      </div>
+      <label class="manageupload">
+        + add photos
+        <input type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/bmp,video/mp4,video/webm,video/quicktime,video/x-matroska" multiple hidden>
+      </label>
+    </div>
     <div class="managegrid"></div>
-    <label class="manageupload">
-      <input type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/bmp,video/mp4,video/webm,video/quicktime,video/x-matroska" multiple hidden>
-      + add photos
-    </label>
     <div class="manageuploadstatus"></div>
   `;
   const grid = section.querySelector(".managegrid");
   const fileinput = section.querySelector("input[type=file]");
   const uploadstatus = section.querySelector(".manageuploadstatus");
+  const selectbar = section.querySelector(".manageselectbar");
+  const selectcount = section.querySelector(".manageselectcount");
+  const selected = new Set();
+
+  function syncselectbar() {
+    selectbar.hidden = selected.size === 0;
+    selectcount.textContent = `${selected.size} selected`;
+  }
 
   async function refresh() {
     grid.innerHTML = `<div class="managegridloading">loading..</div>`;
+    selected.clear();
+    syncselectbar();
     const res = await apiget(`/manage/list?folder=${encodeURIComponent(folder)}`);
     if (!res.ok) {
       grid.innerHTML = `<div class="managegridloading">couldn't load files :(</div>`;
       return;
     }
     const files = Array.isArray(res.body?.files) ? res.body.files : [];
+    folderfiles.set(folder, files);
+    synctree();
     grid.innerHTML = "";
     if (!files.length) {
       grid.innerHTML = `<div class="managegridloading">no photos here yet.</div>`;
       return;
     }
     for (const f of files) {
+      const path = `${folder}/${f.name}`;
       const card = document.createElement("div");
       card.className = "managecard";
+      const isvid = videoext.test(f.name);
       card.innerHTML = `
-        <img class="managethumb" src="${esc(thumburl(`${folder}/${f.name}`))}" alt="" loading="lazy">
-        <div class="managecardname" title="${esc(f.name)}">${esc(f.name)}</div>
-        <div class="managecardmeta">${esc(fmtbytes(f.size))}</div>
-        <div class="managecardactions">
-          <button type="button" class="managerenamebtn">rename</button>
-          <button type="button" class="managedeletebtn">delete</button>
+        <input type="checkbox" class="managecardcheck">
+        <img class="managethumb" src="${esc(thumburl(path))}" alt="" loading="lazy">
+        ${isvid ? `<div class="managecardvidicon">${iconfor(f.name)}</div>` : ""}
+        <div class="managecardhover">
+          <span class="managecardname" title="${esc(f.name)}">${esc(f.name)}</span>
+          <span class="managecardmeta">${esc(fmtbytes(f.size))}</span>
+          <button type="button" class="managerenamebtn" title="rename">rename</button>
         </div>
       `;
-      card.querySelector(".managerenamebtn").addEventListener("click", async () => {
+      const check = card.querySelector(".managecardcheck");
+      check.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (check.checked) selected.add(f.name); else selected.delete(f.name);
+        card.classList.toggle("managecardselected", check.checked);
+        syncselectbar();
+      });
+      card.querySelector(".managerenamebtn").addEventListener("click", async (e) => {
+        e.stopPropagation();
         const next = window.prompt("new filename (keep the extension):", f.name);
         if (!next || next === f.name) return;
         card.style.opacity = "0.5";
@@ -138,16 +255,36 @@ async function renderfolder(folder) {
         if (!r.ok) {alert(`rename failed: ${r.body?.error || r.status}`); card.style.opacity = ""; return}
         refresh();
       });
-      card.querySelector(".managedeletebtn").addEventListener("click", async () => {
-        if (!window.confirm(`delete ${f.name}? this can't be undone from here.`)) return;
-        card.style.opacity = "0.5";
-        const r = await apipost("/manage/delete", {folder, filename: f.name});
-        if (!r.ok) {alert(`delete failed: ${r.body?.error || r.status}`); card.style.opacity = ""; return}
-        refresh();
+      card.addEventListener("click", () => {
+        if (selected.size > 0) {
+          check.checked = !check.checked;
+          check.dispatchEvent(new Event("click", {bubbles: false}));
+          return;
+        }
+        media.openlightbox(rawurl(path), path, isvid);
       });
       grid.appendChild(card);
     }
   }
+
+  section.querySelector(".manageselectclearbtn").addEventListener("click", () => {
+    selected.clear();
+    for (const c of grid.querySelectorAll(".managecardcheck")) c.checked = false;
+    for (const c of grid.querySelectorAll(".managecard")) c.classList.remove("managecardselected");
+    syncselectbar();
+  });
+  section.querySelector(".manageselectdeletebtn").addEventListener("click", async () => {
+    if (!window.confirm(`delete ${selected.size} file(s)? this can't be undone from here.`)) return;
+    const names = [...selected];
+    selectbar.hidden = true;
+    uploadstatus.textContent = `deleting ${names.length} file(s)..`;
+    for (const filename of names) {
+      const r = await apipost("/manage/delete", {folder, filename});
+      if (!r.ok) uploadstatus.textContent = `failed on ${filename}: ${r.body?.error || r.status}`;
+    }
+    uploadstatus.textContent = "";
+    refresh();
+  });
 
   fileinput.addEventListener("change", async () => {
     const chosen = [...fileinput.files || []];
@@ -172,30 +309,43 @@ async function renderfolder(folder) {
   refresh();
 }
 
+/*//////////////////////////////////////////////////////////////////////*/
+
+let saveddebounce = null;
 async function renderadmin() {
-  manageadmin.hidden = false;
-  manageadmin.innerHTML = `<div class="managegridloading">loading admin panel..</div>`;
+  manageadmin.innerHTML = `<div class="managegridloading">loading whitelist..</div>`;
   const [peopleres, foldersres] = await Promise.all([
     apiget("/manage/admin/people"),
     apiget("/manage/admin/allfolders")
   ]);
   if (!peopleres.ok || !foldersres.ok) {
-    manageadmin.innerHTML = `<div class="managegridloading">couldn't load admin panel :(</div>`;
+    manageadmin.innerHTML = `<div class="managegridloading">couldn't load whitelist :(</div>`;
     return;
   }
   const allfolders = Array.isArray(foldersres.body?.folders) ? foldersres.body.folders : [];
   const people = Array.isArray(peopleres.body?.people) ? peopleres.body.people : [];
 
   manageadmin.innerHTML = `
-    <h2 class="managefoldertitle">whitelist (admin)</h2>
     <div class="adminpeoplelist"></div>
     <button type="button" class="adminaddbtn">+ add person</button>
-    <div class="adminactions">
-      <button type="button" class="adminsavebtn">save changes</button>
-      <span class="adminsavestatus"></span>
-    </div>
+    <span class="adminsavestatus"></span>
   `;
   const list = manageadmin.querySelector(".adminpeoplelist");
+  const savestatus = manageadmin.querySelector(".adminsavestatus");
+
+  function scheduleautosave() {
+    savestatus.textContent = "saving..";
+    window.clearTimeout(saveddebounce);
+    saveddebounce = window.setTimeout(async () => {
+      const entries = [...list.querySelectorAll(".adminrow")].map((row) => ({
+        id: row.querySelector(".admininputid").value.trim(),
+        label: row.querySelector(".admininputlabel").value.trim(),
+        folders: [...row.querySelectorAll(".adminrowfolders input:checked")].map((i) => i.value),
+      })).filter((e) => e.id);
+      const r = await apipost("/manage/admin/people", {people: entries});
+      savestatus.textContent = r.ok ? "saved" : `failed: ${r.body?.error || r.status}`;
+    }, 600);
+  }
 
   function addrow(entry) {
     const row = document.createElement("div");
@@ -206,68 +356,69 @@ async function renderadmin() {
     row.innerHTML = `
       <div class="adminrowtop">
         <input type="text" class="admininputid" placeholder="discord user id" value="${esc(entry.id || "")}">
-        <input type="text" class="admininputlabel" placeholder="label (optional, e.g. username)" value="${esc(entry.label || "")}">
+        <input type="text" class="admininputlabel" placeholder="label (optional)" value="${esc(entry.label || "")}">
         <button type="button" class="adminremovebtn" title="remove person">x</button>
       </div>
       <div class="adminrowfolders">${folderchips}</div>
     `;
-    row.querySelector(".adminremovebtn").addEventListener("click", () => row.remove());
+    row.addEventListener("input", scheduleautosave);
+    row.addEventListener("change", scheduleautosave);
+    row.querySelector(".adminremovebtn").addEventListener("click", () => {row.remove(); scheduleautosave()});
     list.appendChild(row);
   }
   for (const entry of people) addrow(entry);
-
   manageadmin.querySelector(".adminaddbtn").addEventListener("click", () => addrow({id: "", label: "", folders: []}));
-
-  manageadmin.querySelector(".adminsavebtn").addEventListener("click", async () => {
-    const savestatus = manageadmin.querySelector(".adminsavestatus");
-    const entries = [...list.querySelectorAll(".adminrow")].map((row) => ({
-      id: row.querySelector(".admininputid").value.trim(),
-      label: row.querySelector(".admininputlabel").value.trim(),
-      folders: [...row.querySelectorAll(".adminrowfolders input:checked")].map((i) => i.value),
-    })).filter((e) => e.id);
-    savestatus.textContent = "saving..";
-    const r = await apipost("/manage/admin/people", {people: entries});
-    savestatus.textContent = r.ok ? "saved!" : `failed: ${r.body?.error || r.status}`;
-  });
 }
+
+if (managewhitelistbtn) managewhitelistbtn.addEventListener("click", () => {
+  manageoverlay.hidden = false;
+  renderadmin();
+});
+if (manageoverlayclose) manageoverlayclose.addEventListener("click", () => {manageoverlay.hidden = true});
+if (manageoverlay) manageoverlay.querySelector(".manageoverlaybackdrop").addEventListener("click", () => {manageoverlay.hidden = true});
+
+/*//////////////////////////////////////////////////////////////////////*/
 
 async function loadmanager() {
   const token = getsetting("discord_token", "");
   if (!token) {
-    managestatus.textContent = "log in with discord to manage your folder!";
+    managestatus.textContent = "log in with discord to manage your folder.";
     managefolders.hidden = true;
+    if (managewhitelistbtn) managewhitelistbtn.hidden = true;
     return;
   }
   managestatus.textContent = "loading your folders..";
   const res = await apiget("/manage/me");
   if (!res.ok) {
-    managestatus.textContent = "couldn't check your account, try logging in again";
+    managestatus.textContent = "couldn't check your account, try logging in again.";
     return;
   }
   const folders = Array.isArray(res.body?.folders) ? res.body.folders : [];
-  if (res.body?.isadmin) renderadmin();
-  else manageadmin.hidden = true;
+  if (managewhitelistbtn) managewhitelistbtn.hidden = !res.body?.isadmin;
   if (res.body?.githuberror) {
     managestatus.textContent = `github api error (status ${res.body.githuberror.status}): ${res.body.githuberror.body?.message || JSON.stringify(res.body.githuberror.body)}`;
   }
   if (!folders.length) {
     if (!res.body?.githuberror)
-      managestatus.textContent = "you're logged in but not set up to manage any folder here yet, ask cv to get added";
+      managestatus.textContent = "you're logged in but not set up to manage any folder here yet, ask cv to get added!";
     managefolders.hidden = true;
     return;
   }
   managestatus.textContent = "";
   managefolders.hidden = false;
   managefolders.innerHTML = "";
+  folderfiles.clear();
   for (const folder of folders) renderfolder(folder);
 }
 
 discord.wireui({medialightbox: null, oncomments: () => {}});
-syncavatarbutton();
+discord.updatediscordavatar();
 discord.handlediscordoauthcallbackifpresent();
+if (manageloginbtn) manageloginbtn.addEventListener("click", () => discord.opendiscordpopup());
+
 if (!(window.opener && window.opener !== window) && !getsetting("discord_token", "")) {
   discord.resolvediscorduser().then(loadmanager);
 } else {
   loadmanager();
 }
-window.addEventListener("message", () => window.setTimeout(() => {syncavatarbutton(); loadmanager()}, 300));
+window.addEventListener("message", () => window.setTimeout(() => {discord.updatediscordavatar(); loadmanager()}, 300));

@@ -1,47 +1,86 @@
 .managepage {
-    max-width: 960px; margin: 0 auto;
-    padding: 24px; color: #e3e3e3;
+    width: 100%; margin: 0;
+    padding: 16px 20px 40px;
+    color: #e3e3e3;
     font-family: Arial, sans-serif;
+    box-sizing: border-box;
 }
 
 .manageheader {
     display: flex; align-items: center;
     justify-content: space-between;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
-.manageheader h1 {font-size: 20px; margin: 0}
+.manageheader h1 {font-size: 18px; margin: 0}
 
-.managelogin {position: relative}
+.manageheaderactions {display: flex; align-items: center; gap: 10px}
+
+.managewhitelistbtn {
+    background: transparent; border: none;
+    cursor: pointer; padding: 6px;
+    border-radius: 8px;
+}
+.managewhitelistbtn:hover {background: rgba(255,255,255,0.06)}
+
+/* login/logout: css alone decides which half of the menu shows, based on whether
+   discordmenulogout is hidden (drivediscord already toggles that for us) */
 .discordmenu {
-    position: absolute; right: 0; top: 44px;
-    background: #1b1b1b; border-radius: 10px;
-    padding: 12px; min-width: 180px;
     display: flex; align-items: center; gap: 8px;
-    z-index: 10;
 }
 .discordmenuavatar {
-    width: 32px; height: 32px;
+    width: 28px; height: 28px;
     border-radius: 50%; overflow: hidden;
     background: #2b2b2b; flex-shrink: 0;
 }
-.discordmenuname {flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap}
-.discordmenulogout {
-    background: transparent; border: none;
-    color: #df9d9b; cursor: pointer;
-    font-size: 12px;
+.discordmenuname {font-size: 13px; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap}
+.managelogin, .discordmenulogout {
+    background: #2b2b2b; border: none;
+    border-radius: 6px; cursor: pointer;
+    font-size: 12px; padding: 7px 12px;
 }
+.discordmenulogout {color: #df9d9b}
+.managelogin {color: #8ab4f8}
+.discordmenu:has(.discordmenulogout:not([hidden])) .managelogin {display: none}
+.discordmenu:has(.discordmenulogout[hidden]) .discordmenuavatar,
+.discordmenu:has(.discordmenulogout[hidden]) .discordmenuname,
+.discordmenu:has(.discordmenulogout[hidden]) .discordmenulogout {display: none}
 
-.managestatus {color: #9aa0a6; padding: 24px 0}
+.managestatus {color: #9aa0a6; padding: 16px 0}
 
-.managefolder {margin-bottom: 32px}
+/*//////////////////////////////////////////////////////////////////////*/
+
+.managefolder {margin-bottom: 28px}
+.managefolderhead {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 10px; flex-wrap: wrap;
+}
 .managefoldertitle {
-    font-size: 16px; margin: 0 0 12px;
+    font-size: 15px; margin: 0;
     text-transform: capitalize;
 }
 
+.manageselectbar {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: #9aa0a6;
+}
+.manageselectdeletebtn, .manageselectclearbtn {
+    background: #2b2b2b; border: none;
+    border-radius: 6px; padding: 5px 10px;
+    font-size: 11px; cursor: pointer; color: #e3e3e3;
+}
+.manageselectdeletebtn {color: #df9d9b}
+
+.manageupload {
+    margin-left: auto;
+    background: #2b2b2b; color: #8ab4f8;
+    padding: 6px 12px; border-radius: 6px;
+    cursor: pointer; font-size: 12px;
+}
+.manageupload:hover {background: #333}
+
 .managegrid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 12px; margin-bottom: 12px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+    gap: 6px;
 }
 .managegridloading {
     color: #9aa0a6; font-size: 13px;
@@ -49,62 +88,94 @@
 }
 
 .managecard {
-    background: #1b1b1b; border-radius: 8px;
-    overflow: hidden; transition: opacity 0.15s;
+    position: relative; aspect-ratio: 1;
+    border-radius: 6px; overflow: hidden;
+    cursor: pointer; background: #111;
+    transition: opacity 0.15s;
 }
 .managethumb {
-    width: 100%; aspect-ratio: 1;
+    width: 100%; height: 100%;
     object-fit: cover; display: block;
-    background: #111;
 }
-.managecardname {
-    font-size: 12px; padding: 6px 8px 0;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+.managecardvidicon {
+    position: absolute; top: 4px; right: 4px;
+    width: 18px; height: 18px;
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.8));
 }
-.managecardmeta {font-size: 11px; color: #9aa0a6; padding: 0 8px}
-.managecardactions {
-    display: flex; gap: 6px;
-    padding: 8px;
-}
-.managecardactions button {
-    flex: 1; font-size: 11px;
-    padding: 6px; border-radius: 6px;
-    border: none; cursor: pointer;
-    background: #2b2b2b; color: #e3e3e3;
-}
-.managedeletebtn {color: #df9d9b !important}
-.managecardactions button:hover {background: #333}
+.managecardvidicon .icon {width: 100%; height: 100%}
 
-.manageupload {
-    display: inline-block;
-    background: #2b2b2b; color: #8ab4f8;
-    padding: 10px 16px; border-radius: 8px;
-    cursor: pointer; font-size: 13px;
+.managecardcheck {
+    position: absolute; top: 4px; left: 4px;
+    z-index: 2; width: 16px; height: 16px;
+    cursor: pointer;
 }
-.manageupload:hover {background: #333}
+.managecardselected {outline: 2px solid #8ab4f8; outline-offset: -2px}
+
+.managecardhover {
+    position: absolute; inset: auto 0 0 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.85));
+    padding: 14px 6px 4px;
+    display: flex; flex-direction: column; gap: 2px;
+    opacity: 0; transition: opacity 0.15s;
+    pointer-events: none;
+}
+.managecard:hover .managecardhover {opacity: 1; pointer-events: auto}
+.managecardname {
+    font-size: 10px; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
+}
+.managecardmeta {font-size: 9px; color: #9aa0a6}
+.managerenamebtn {
+    align-self: flex-start;
+    background: rgba(255,255,255,0.12); border: none;
+    border-radius: 4px; color: #e3e3e3;
+    font-size: 9px; padding: 2px 6px;
+    cursor: pointer; margin-top: 2px;
+}
+.managerenamebtn:hover {background: rgba(255,255,255,0.22)}
+
 .manageuploadstatus {
     color: #9aa0a6; font-size: 12px;
-    margin-top: 8px;
+    margin-top: 6px;
 }
 
-.manageadmin {
-    background: #161b12; border: 1px solid #2c3a22;
-    border-radius: 10px; padding: 16px;
-    margin-bottom: 32px;
+/*//////////////////////////////////////////////////////////////////////*/
+
+.manageoverlay {
+    position: fixed; inset: 0;
+    z-index: 4000;
+    display: flex; align-items: center; justify-content: center;
 }
+.manageoverlay[hidden] {display: none !important}
+.manageoverlaybackdrop {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.6);
+}
+.manageoverlaybox {
+    position: relative; z-index: 1;
+    background: #1b1b1b; border-radius: 12px;
+    width: min(560px, 92vw); max-height: 82vh;
+    overflow: auto; padding: 20px;
+}
+.manageoverlayhead {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+}
+.manageoverlayhead h2 {font-size: 16px; margin: 0}
+.manageoverlayclose {background: transparent; border: none; cursor: pointer; padding: 4px}
 
 .adminrow {
-    background: #1b1b1b; border-radius: 8px;
+    background: #111; border-radius: 8px;
     padding: 10px; margin-bottom: 8px;
 }
 .adminrowtop {
     display: flex; gap: 8px;
     margin-bottom: 8px;
 }
-.admininputid {width: 160px}
+.admininputid {width: 150px}
 .admininputlabel {flex: 1}
 .adminrowtop input {
-    background: #111; border: 1px solid #333;
+    background: #1b1b1b; border: 1px solid #333;
     border-radius: 6px; color: #e3e3e3;
     padding: 6px 8px; font-size: 12px;
 }
@@ -119,7 +190,7 @@
 }
 .adminchip {
     display: flex; align-items: center; gap: 4px;
-    background: #111; border-radius: 999px;
+    background: #1b1b1b; border-radius: 999px;
     padding: 3px 10px 3px 6px;
     font-size: 11px; cursor: pointer;
 }
@@ -128,15 +199,6 @@
     background: #2b2b2b; color: #8ab4f8;
     border: none; border-radius: 6px;
     padding: 8px 14px; font-size: 12px;
-    cursor: pointer; margin-bottom: 12px;
-}
-.adminactions {
-    display: flex; align-items: center; gap: 12px;
-}
-.adminsavebtn {
-    background: #9dc384; color: #12160f;
-    border: none; border-radius: 6px;
-    padding: 8px 16px; font-size: 12px;
-    font-weight: bold; cursor: pointer;
+    cursor: pointer; margin-right: 12px;
 }
 .adminsavestatus {color: #9aa0a6; font-size: 12px}

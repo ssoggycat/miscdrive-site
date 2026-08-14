@@ -4,7 +4,7 @@
 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MANAGE your cat!! big business</title>
+    <title>manage your cat!! big business oh yeah</title>
 
     <link rel="icon" type="image/png" href="favicon.png" />
     <link rel="stylesheet" href="index.css" />
@@ -15,25 +15,94 @@
     <div class="managepage">
       <header class="manageheader">
         <h1>manage files</h1>
-        <div class="managelogin">
-          <button type="button" class="discordavatarbutton headericonbutton">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#aac1f0" viewBox="0 -960 960 960">
-              <path d="M480-481q66 0 113-47t47-113-47-113-113-47-113 47-47 113 47 113 113 47M160-160v-94q0-38 19-65t49-41q67-30 128.5-45T480-420t123.5 15.5T732-360q31 14 49.5 41t18.5 65v94z"/>
+        <div class="manageheaderactions">
+          <button type="button" class="managewhitelistbtn headericonbutton" title="whitelist" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#aac1f0" viewBox="0 -960 960 960">
+              <path d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24.5 12L590-80zm112-260q58 0 99-41t41-99-41-99-99-41-99 41-41 99 41 99 99 41" />
             </svg>
           </button>
-          <div class="discordmenu" hidden>
+          <div class="discordmenu">
             <div class="discordmenuavatar"></div>
             <div class="discordmenuname"></div>
-            <button type="button" class="discordmenulogout">log out</button>
+            <button type="button" class="managelogin">log in with discord</button>
+            <button type="button" class="discordmenulogout" hidden>log out</button>
           </div>
         </div>
       </header>
       <main class="managemain">
-        <div class="managestatus">log in with discord to manage your folder</div>
-        <section class="manageadmin" hidden></section>
+        <div class="managestatus">log in with discord to manage your folder.</div>
         <div class="managefolders" hidden></div>
       </main>
     </div>
+
+    <div class="manageoverlay" hidden>
+      <div class="manageoverlaybackdrop"></div>
+      <div class="manageoverlaybox">
+        <div class="manageoverlayhead">
+          <h2>whitelist</h2>
+          <button type="button" class="manageoverlayclose headericonbutton" title="close">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#e3e3e3" viewBox="0 -960 960 960">
+              <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80z"/>
+            </svg>
+          </button>
+        </div>
+        <section class="manageadmin"></section>
+      </div>
+    </div>
+
+    <div class="medialightbox" hidden>
+      <div class="mediabackdrop"></div>
+      <div class="mediabox" role="dialog" aria-modal="true">
+        <div class="mediatoolbar">
+          <button type="button" class="mediaclose headericonbutton" title="close preview">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#e3e3e3" viewBox="0 -960 960 960">
+              <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80z"/>
+            </svg>
+          </button>
+          <button type="button" class="mediatoolbtn mediadownload headericonbutton" title="download">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#e3e3e3" viewBox="0 -960 960 960">
+              <path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58zM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160z"/>
+            </svg>
+          </button>
+          <button type="button" class="mediatoolbtn mediacopylink headericonbutton" title="copy preview link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#e3e3e3" viewBox="0 -960 960 960">
+              <path d="M440-280H280q-83 0-141.5-58.5T80-480q0-83 58.5-141.5T280-680h160v80H280q-50 0-85 35t-35 85q0 50 35 85t85 35h160zM320-440v-80h320v80zm200 160v-80h160q50 0 85-35t35-85q0-50-35-85t-85-35H520v-80h160q83 0 141.5 58.5T880-480q0 83-58.5 141.5T680-280z"/>
+            </svg>
+          </button>
+          <button type="button" class="mediatoolbtn mediacopyimagelink headericonbutton" title="copy image link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#e3e3e3" viewBox="0 -960 960 960">
+              <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120zm0-80h560v-560H200zm40-80h480L570-480 450-320l-90-120zm-40 80v-560z"/>
+            </svg>
+          </button>
+          <button type="button" class="mediatoolbtn mediacommentbtn headericonbutton" title="add comment">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#e3e3e3" viewBox="0 -960 960 960">
+              <path d="M440-400h80v-120h120v-80H520v-120h-80v120H320v80h120zM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240zm126-240h594v-480H160v525zm-46 0v-480z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="mediaviewport">
+          <div class="mediastage">
+            <button type="button" class="medianav medianavleft headericonbutton" title="previous image" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960">
+                <path d="M560-240 320-480l240-240 56 56-184 184 184 184z"/>
+              </svg>
+            </button>
+            <button type="button" class="medianav medianavright headericonbutton" title="next image" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#9aa0a6" viewBox="0 -960 960 960">
+                <path d="M504-480 320-664l56-56 240 240-240 240-56-56z"/>
+              </svg>
+            </button>
+            <div class="mediacontent"></div>
+            <div class="mediaregionlayer"></div>
+            <div class="mediainfo" aria-live="polite"></div>
+          </div>
+          <aside class="mediacomments" hidden>
+            <div class="mediacommentslist"></div>
+          </aside>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="src/manage.js"></script>
   </body>
 </html>
