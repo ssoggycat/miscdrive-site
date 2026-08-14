@@ -411,14 +411,29 @@ async function loadmanager() {
   for (const folder of folders) renderfolder(folder);
 }
 
+function synclogindisplay() {
+  discord.updatediscordavatar();
+  const loggedin = !!discord.getdiscorduser();
+  if (manageloginbtn) manageloginbtn.hidden = loggedin;
+  if (discordmenuavatar) discordmenuavatar.hidden = !loggedin;
+  if (discordmenuname) discordmenuname.hidden = !loggedin;
+  if (discordmenulogout) discordmenulogout.hidden = !loggedin;
+}
+
 discord.wireui({medialightbox: null, oncomments: () => {}});
-discord.updatediscordavatar();
+synclogindisplay();
 discord.handlediscordoauthcallbackifpresent();
 if (manageloginbtn) manageloginbtn.addEventListener("click", () => discord.opendiscordpopup());
+if (discordmenulogout) discordmenulogout.addEventListener("click", synclogindisplay);
 
 if (!(window.opener && window.opener !== window) && !getsetting("discord_token", "")) {
-  discord.resolvediscorduser().then(loadmanager);
+  discord.resolvediscorduser().then(() => {synclogindisplay(); loadmanager()});
 } else {
   loadmanager();
 }
-window.addEventListener("message", () => window.setTimeout(() => {discord.updatediscordavatar(); loadmanager()}, 300));
+
+window.addEventListener("message", (e) => {
+  if (e.origin !== location.origin) return;
+  if (e.data?.type !== "discord_oauth_code") return;
+  window.setTimeout(() => {synclogindisplay(); loadmanager()}, 300);
+});

@@ -22,8 +22,6 @@
 }
 .managewhitelistbtn:hover {background: rgba(255,255,255,0.06)}
 
-/* login/logout: css alone decides which half of the menu shows, based on whether
-   discordmenulogout is hidden (drivediscord already toggles that for us) */
 .discordmenu {
     display: flex; align-items: center; gap: 8px;
 }
@@ -40,10 +38,6 @@
 }
 .discordmenulogout {color: #df9d9b}
 .managelogin {color: #8ab4f8}
-.discordmenu:has(.discordmenulogout:not([hidden])) .managelogin {display: none}
-.discordmenu:has(.discordmenulogout[hidden]) .discordmenuavatar,
-.discordmenu:has(.discordmenulogout[hidden]) .discordmenuname,
-.discordmenu:has(.discordmenulogout[hidden]) .discordmenulogout {display: none}
 
 .managestatus {color: #9aa0a6; padding: 16px 0}
 
