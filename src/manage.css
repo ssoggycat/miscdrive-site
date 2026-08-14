@@ -86,3 +86,57 @@
     color: #9aa0a6; font-size: 12px;
     margin-top: 8px;
 }
+
+.manageadmin {
+    background: #161b12; border: 1px solid #2c3a22;
+    border-radius: 10px; padding: 16px;
+    margin-bottom: 32px;
+}
+
+.adminrow {
+    background: #1b1b1b; border-radius: 8px;
+    padding: 10px; margin-bottom: 8px;
+}
+.adminrowtop {
+    display: flex; gap: 8px;
+    margin-bottom: 8px;
+}
+.admininputid {width: 160px}
+.admininputlabel {flex: 1}
+.adminrowtop input {
+    background: #111; border: 1px solid #333;
+    border-radius: 6px; color: #e3e3e3;
+    padding: 6px 8px; font-size: 12px;
+}
+.adminremovebtn {
+    background: #2b2b2b; border: none;
+    border-radius: 6px; color: #df9d9b;
+    width: 28px; cursor: pointer;
+}
+
+.adminrowfolders {
+    display: flex; flex-wrap: wrap; gap: 6px;
+}
+.adminchip {
+    display: flex; align-items: center; gap: 4px;
+    background: #111; border-radius: 999px;
+    padding: 3px 10px 3px 6px;
+    font-size: 11px; cursor: pointer;
+}
+
+.adminaddbtn {
+    background: #2b2b2b; color: #8ab4f8;
+    border: none; border-radius: 6px;
+    padding: 8px 14px; font-size: 12px;
+    cursor: pointer; margin-bottom: 12px;
+}
+.adminactions {
+    display: flex; align-items: center; gap: 12px;
+}
+.adminsavebtn {
+    background: #9dc384; color: #12160f;
+    border: none; border-radius: 6px;
+    padding: 8px 16px; font-size: 12px;
+    font-weight: bold; cursor: pointer;
+}
+.adminsavestatus {color: #9aa0a6; font-size: 12px}

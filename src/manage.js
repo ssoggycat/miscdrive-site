@@ -12,6 +12,7 @@ const discordavatarbutton = document.querySelector(".discordavatarbutton"),
   discordmenuname = document.querySelector(".discordmenuname"),
   discordmenulogout = document.querySelector(".discordmenulogout"),
   managestatus = document.querySelector(".managestatus"),
+  manageadmin = document.querySelector(".manageadmin"),
   managefolders = document.querySelector(".managefolders");
 
 function loadsettings() {
@@ -156,6 +157,65 @@ async function renderfolder(folder) {
   refresh();
 }
 
+async function renderadmin() {
+  manageadmin.hidden = false;
+  manageadmin.innerHTML = `<div class="managegridloading">loading admin panel..</div>`;
+  const [peopleres, foldersres] = await Promise.all([
+    apiget("/manage/admin/people"),
+    apiget("/manage/admin/allfolders")
+  ]);
+  if (!peopleres.ok || !foldersres.ok) {
+    manageadmin.innerHTML = `<div class="managegridloading">couldn't load admin panel :(</div>`;
+    return;
+  }
+  const allfolders = Array.isArray(foldersres.body?.folders) ? foldersres.body.folders : [];
+  const people = Array.isArray(peopleres.body?.people) ? peopleres.body.people : [];
+
+  manageadmin.innerHTML = `
+    <h2 class="managefoldertitle">whitelist (admin)</h2>
+    <div class="adminpeoplelist"></div>
+    <button type="button" class="adminaddbtn">+ add person</button>
+    <div class="adminactions">
+      <button type="button" class="adminsavebtn">save changes</button>
+      <span class="adminsavestatus"></span>
+    </div>
+  `;
+  const list = manageadmin.querySelector(".adminpeoplelist");
+
+  function addrow(entry) {
+    const row = document.createElement("div");
+    row.className = "adminrow";
+    const folderchips = allfolders.map((f) =>
+      `<label class="adminchip"><input type="checkbox" value="${esc(f)}" ${entry.folders.includes(f) ? "checked" : ""}> ${esc(f)}</label>`
+    ).join("");
+    row.innerHTML = `
+      <div class="adminrowtop">
+        <input type="text" class="admininputid" placeholder="discord user id" value="${esc(entry.id || "")}">
+        <input type="text" class="admininputlabel" placeholder="label (optional, e.g. username)" value="${esc(entry.label || "")}">
+        <button type="button" class="adminremovebtn" title="remove person">x</button>
+      </div>
+      <div class="adminrowfolders">${folderchips}</div>
+    `;
+    row.querySelector(".adminremovebtn").addEventListener("click", () => row.remove());
+    list.appendChild(row);
+  }
+  for (const entry of people) addrow(entry);
+
+  manageadmin.querySelector(".adminaddbtn").addEventListener("click", () => addrow({id: "", label: "", folders: []}));
+
+  manageadmin.querySelector(".adminsavebtn").addEventListener("click", async () => {
+    const savestatus = manageadmin.querySelector(".adminsavestatus");
+    const entries = [...list.querySelectorAll(".adminrow")].map((row) => ({
+      id: row.querySelector(".admininputid").value.trim(),
+      label: row.querySelector(".admininputlabel").value.trim(),
+      folders: [...row.querySelectorAll(".adminrowfolders input:checked")].map((i) => i.value),
+    })).filter((e) => e.id);
+    savestatus.textContent = "saving..";
+    const r = await apipost("/manage/admin/people", {people: entries});
+    savestatus.textContent = r.ok ? "saved!" : `failed: ${r.body?.error || r.status}`;
+  });
+}
+
 async function loadmanager() {
   const token = getsetting("discord_token", "");
   if (!token) {
@@ -170,6 +230,8 @@ async function loadmanager() {
     return;
   }
   const folders = Array.isArray(res.body?.folders) ? res.body.folders : [];
+  if (res.body?.isadmin) renderadmin();
+  else manageadmin.hidden = true;
   if (!folders.length) {
     managestatus.textContent = "you're logged in but not set up to manage any folder here yet, ask cv to get added";
     managefolders.hidden = true;
