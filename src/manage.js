@@ -439,7 +439,7 @@ synclogindisplay();
 discord.handlediscordoauthcallbackifpresent();
 
 if (manageloginbtn) manageloginbtn.addEventListener("click", () => {
-  location.href = discord.discordauthurl(`${location.origin}${location.pathname}`);
+  location.href = discord.discordauthurl(`${location.origin}/manage.html`);
 });
 if (discordmenulogout) discordmenulogout.addEventListener("click", synclogindisplay);
 
