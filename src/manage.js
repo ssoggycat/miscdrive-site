@@ -234,14 +234,14 @@ async function renderfolder(folder) {
       return;
     }
     for (const f of files) {
-      const path = `${folder}/${f.name}`;
+      const path = () => `${folder}/${f.name}`;
       const card = document.createElement("div");
       card.className = "managecard";
       const isvid = videoext.test(f.name);
       card.innerHTML = `
         <div class="managethumbwrap">
           <input type="checkbox" class="managecardcheck">
-          <img class="managethumb" src="${esc(thumburlsmall(path))}" alt="" loading="lazy">
+          <img class="managethumb" src="${esc(thumburlsmall(path()))}" alt="" loading="lazy">
           ${isvid ? `<div class="managecardvidicon">${iconfor(f.name)}</div>` : ""}
         </div>
         <div class="managecardinfo">
@@ -253,6 +253,7 @@ async function renderfolder(folder) {
           </div>
         </div>
       `;
+      const nameel = card.querySelector(".managecardname");
       const check = card.querySelector(".managecardcheck");
       check.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -269,8 +270,12 @@ async function renderfolder(folder) {
         if (badreason) {alert(`can't rename to "${trimmed}": ${badreason}`); return}
         card.style.opacity = "0.5";
         const r = await apipost("/manage/rename", {folder, oldname: f.name, newname: trimmed});
-        if (!r.ok) {alert(`rename failed: ${r.body?.error || r.status}`); card.style.opacity = ""; return}
-        refresh();
+        card.style.opacity = "";
+        if (!r.ok) {alert(`rename failed: ${r.body?.error || r.status}`); return}
+
+        f.name = trimmed;
+        nameel.textContent = trimmed;
+        nameel.title = trimmed;
       });
       card.querySelector(".managedeletebtn").addEventListener("click", async (e) => {
         e.stopPropagation();
@@ -287,7 +292,7 @@ async function renderfolder(folder) {
           check.dispatchEvent(new Event("click", {bubbles: false}));
           return;
         }
-        media.openlightbox(rawurl(path), path, isvid);
+        media.openlightbox(rawurl(path()), path(), isvid);
       });
       grid.appendChild(card);
     }
@@ -302,8 +307,10 @@ async function renderfolder(folder) {
   section.querySelector(".manageselectdeletebtn").addEventListener("click", async () => {
     if (!window.confirm(`delete ${selected.size} file(s)? this can't be undone from here.`)) return;
     const names = [...selected];
+    
     selectbar.hidden = true;
     uploadstatus.textContent = `deleting ${names.length} file(s)..`;
+
     for (const filename of names) {
       const r = await apipost("/manage/delete", {folder, filename});
       if (!r.ok) uploadstatus.textContent = `failed on ${filename}: ${r.body?.error || r.status}`;
