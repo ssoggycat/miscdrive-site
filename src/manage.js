@@ -207,7 +207,10 @@ async function renderfolder(folder) {
     <div class="managereadme" hidden>
       <div class="managereadmeedit">
         <textarea class="managereadmetextarea" placeholder="write a readme for this folder.. markdown supported"></textarea>
-        <span class="managereadmestatus"></span>
+        <div class="managereadmebar">
+          <button type="button" class="managereadmesavebtn">save</button>
+          <span class="managereadmestatus"></span>
+        </div>
       </div>
       <div class="managereadmepreview"></div>
     </div>
@@ -218,20 +221,24 @@ async function renderfolder(folder) {
   const readmepanel = section.querySelector(".managereadme");
   const readmetextarea = section.querySelector(".managereadmetextarea");
   const readmepreview = section.querySelector(".managereadmepreview");
+  const readmesavebtn = section.querySelector(".managereadmesavebtn");
   const readmestatus = section.querySelector(".managereadmestatus");
+  const readmedraftkey = `managereadmedraft:${folder}`;
   let readmeloaded = false;
-  let readmedebounce = null;
   function syncreadmepreview() {
     readmepreview.innerHTML = mdtohtml(readmetextarea.value);
   }
   readmetextarea.addEventListener("input", () => {
     syncreadmepreview();
+    try {localStorage.setItem(readmedraftkey, readmetextarea.value)} catch (_) {}
+    readmestatus.textContent = "unsaved changes";
+  });
+  readmesavebtn.addEventListener("click", async () => {
     readmestatus.textContent = "saving..";
-    window.clearTimeout(readmedebounce);
-    readmedebounce = window.setTimeout(async () => {
-      const r = await apipost("/manage/readme", {folder, content: readmetextarea.value});
-      readmestatus.textContent = r.ok ? "saved" : `failed: ${r.body?.error || r.status}`;
-    }, 600);
+    const r = await apipost("/manage/readme", {folder, content: readmetextarea.value});
+    if (!r.ok) {readmestatus.textContent = `failed: ${r.body?.error || r.status}`; return}
+    try {localStorage.removeItem(readmedraftkey)} catch (_) {}
+    readmestatus.textContent = "saved";
   });
   readmebtn.addEventListener("click", async () => {
     readmepanel.hidden = !readmepanel.hidden;
@@ -239,9 +246,16 @@ async function renderfolder(folder) {
     readmeloaded = true;
     readmestatus.textContent = "loading..";
     const r = await apiget(`/manage/readme?folder=${encodeURIComponent(folder)}`);
-    readmestatus.textContent = "";
     if (!r.ok) {readmestatus.textContent = `couldn't load: ${r.body?.error || r.status}`; return}
-    readmetextarea.value = r.body?.content || "";
+    let draft = null;
+    try {draft = localStorage.getItem(readmedraftkey)} catch (_) {}
+    if (draft !== null && draft !== (r.body?.content || "")) {
+      readmetextarea.value = draft;
+      readmestatus.textContent = "unsaved changes (restored)";
+    } else {
+      readmetextarea.value = r.body?.content || "";
+      readmestatus.textContent = "";
+    }
     syncreadmepreview();
   });
   const grid = section.querySelector(".managegrid");

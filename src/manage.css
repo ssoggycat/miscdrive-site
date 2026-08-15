@@ -119,6 +119,16 @@
     font-family: Consolas, monospace; font-size: 12px;
     padding: 10px; box-sizing: border-box;
 }
+.managereadmebar {
+    display: flex; align-items: center; gap: 8px;
+}
+.managereadmesavebtn {
+    background: #2b2b2b; color: #8ab4f8;
+    border: none; border-radius: 6px;
+    padding: 5px 12px; font-size: 11px;
+    cursor: pointer;
+}
+.managereadmesavebtn:hover {background: #333}
 .managereadmestatus {color: #9aa0a6; font-size: 11px}
 .managereadmepreview {
     min-height: 220px;
