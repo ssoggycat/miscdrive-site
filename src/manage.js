@@ -15,6 +15,7 @@ const discordmenu = document.querySelector(".discordmenu"),
   managewhitelistbtn = document.querySelector(".managewhitelistbtn"),
   managestatus = document.querySelector(".managestatus"),
   managefolders = document.querySelector(".managefolders"),
+  managefolderbar = document.querySelector(".managefolderbar"),
   manageoverlay = document.querySelector(".manageoverlay"),
   manageoverlayclose = document.querySelector(".manageoverlayclose"),
   manageadmin = document.querySelector(".manageadmin"),
@@ -147,6 +148,14 @@ function fmtbytes(n) {
   return `${(n / (1024 * 1024)).toFixed(1)}mb`;
 }
 
+const WINDOWS_UNSAFE_CHARS = /[<>:"/\\|?*\x00-\x1f]/;
+function invalidfilenamereason(name) {
+  if (!name) return "missing filename";
+  if (WINDOWS_UNSAFE_CHARS.test(name)) return `can't use < > : " / \\ | ? * in a filename`;
+  if (/[. ]$/.test(name)) return "can't end a filename with a space or a dot";
+  return null;
+}
+
 function fileaspreview(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -255,8 +264,11 @@ async function renderfolder(folder) {
         e.stopPropagation();
         const next = window.prompt("new filename (keep the extension):", f.name);
         if (!next || next === f.name) return;
+        const trimmed = next.trim();
+        const badreason = invalidfilenamereason(trimmed);
+        if (badreason) {alert(`can't rename to "${trimmed}": ${badreason}`); return}
         card.style.opacity = "0.5";
-        const r = await apipost("/manage/rename", {folder, oldname: f.name, newname: next.trim()});
+        const r = await apipost("/manage/rename", {folder, oldname: f.name, newname: trimmed});
         if (!r.ok) {alert(`rename failed: ${r.body?.error || r.status}`); card.style.opacity = ""; return}
         refresh();
       });
@@ -305,6 +317,11 @@ async function renderfolder(folder) {
     fileinput.value = "";
     if (!chosen.length) return;
     for (const file of chosen) {
+      const badreason = invalidfilenamereason(file.name);
+      if (badreason) {
+        uploadstatus.textContent = `skipped ${file.name}: ${badreason}`;
+        continue;
+      }
       uploadstatus.textContent = `uploading ${file.name}..`;
       try {
         const dataurl = await fileaspreview(file);
@@ -319,8 +336,32 @@ async function renderfolder(folder) {
     refresh();
   });
 
+  managefolders.innerHTML = "";
   managefolders.appendChild(section);
   refresh();
+}
+
+let currentfolder = null;
+function renderfolderbar(folders) {
+  if (!managefolderbar) return;
+  managefolderbar.hidden = false;
+  managefolderbar.innerHTML = "";
+  if (!currentfolder || !folders.includes(currentfolder)) currentfolder = folders[0];
+  for (const folder of folders) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "managefolderbarbtn";
+    btn.textContent = folder;
+    btn.classList.toggle("managefolderbarbtnactive", folder === currentfolder);
+    btn.addEventListener("click", () => {
+      currentfolder = folder;
+      for (const b of managefolderbar.querySelectorAll(".managefolderbarbtn"))
+        b.classList.toggle("managefolderbarbtnactive", b.textContent === folder);
+      renderfolder(folder);
+    });
+    managefolderbar.appendChild(btn);
+  }
+  renderfolder(currentfolder);
 }
 
 /*//////////////////////////////////////////////////////////////////////*/
@@ -416,13 +457,13 @@ async function loadmanager() {
     if (!res.body?.githuberror)
       managestatus.textContent = "you're logged in but not set up to manage any folder here yet, ask cv to get added!";
     managefolders.hidden = true;
+    if (managefolderbar) managefolderbar.hidden = true;
     return;
   }
   managestatus.textContent = "";
   managefolders.hidden = false;
-  managefolders.innerHTML = "";
   folderfiles.clear();
-  for (const folder of folders) renderfolder(folder);
+  renderfolderbar(folders);
 }
 
 function synclogindisplay() {

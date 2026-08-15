@@ -48,13 +48,26 @@
 
 /*//////////////////////////////////////////////////////////////////////*/
 
-.managefolders {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-    gap: 12px 24px; align-items: start;
-}
-
+.managefolders {padding-bottom: 64px}
 .managefolder {margin-bottom: 0}
+
+.managefolderbar {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    z-index: 150;
+    display: flex; gap: 6px; overflow-x: auto;
+    padding: 10px 20px;
+    background: #161616; border-top: 1px solid #2b2b2b;
+}
+.managefolderbar[hidden] {display: none}
+.managefolderbarbtn {
+    flex-shrink: 0;
+    background: #2b2b2b; border: none;
+    border-radius: 999px; color: #e3e3e3;
+    padding: 7px 14px; font-size: 12px;
+    text-transform: capitalize; cursor: pointer;
+}
+.managefolderbarbtn:hover {background: #333}
+.managefolderbarbtnactive {background: #8ab4f8; color: #12160f; font-weight: bold}
 .managefolderhead {
     display: flex; align-items: center; gap: 12px;
     margin-bottom: 10px; flex-wrap: wrap;
