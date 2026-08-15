@@ -373,9 +373,7 @@ async function renderfolder(folder) {
     refresh();
   });
 
-  fileinput.addEventListener("change", async () => {
-    const chosen = [...fileinput.files || []];
-    fileinput.value = "";
+  async function uploadfiles(chosen) {
     if (!chosen.length) return;
     for (const file of chosen) {
       const badreason = invalidfilenamereason(file.name);
@@ -395,6 +393,35 @@ async function renderfolder(folder) {
     }
     uploadstatus.textContent = "";
     refresh();
+  }
+
+  fileinput.addEventListener("change", () => {
+    const chosen = [...fileinput.files || []];
+    fileinput.value = "";
+    uploadfiles(chosen);
+  });
+
+  let dragdepth = 0;
+  grid.addEventListener("dragenter", (e) => {
+    if (!e.dataTransfer?.types?.includes("Files")) return;
+    e.preventDefault();
+    dragdepth++;
+    grid.classList.add("managegriddragover");
+  });
+  grid.addEventListener("dragover", (e) => {
+    if (!e.dataTransfer?.types?.includes("Files")) return;
+    e.preventDefault();
+  });
+  grid.addEventListener("dragleave", () => {
+    dragdepth = Math.max(0, dragdepth - 1);
+    if (!dragdepth) grid.classList.remove("managegriddragover");
+  });
+  grid.addEventListener("drop", (e) => {
+    if (!e.dataTransfer?.types?.includes("Files")) return;
+    e.preventDefault();
+    dragdepth = 0;
+    grid.classList.remove("managegriddragover");
+    uploadfiles([...e.dataTransfer.files || []]);
   });
 
   managefolders.innerHTML = "";
