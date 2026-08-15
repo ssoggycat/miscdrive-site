@@ -375,10 +375,13 @@ async function renderfolder(folder) {
 
   async function uploadfiles(chosen) {
     if (!chosen.length) return;
+    let uploaded = 0;
+    let lasterror = "";
     for (const file of chosen) {
       const badreason = invalidfilenamereason(file.name);
       if (badreason) {
-        uploadstatus.textContent = `skipped ${file.name}: ${badreason}`;
+        lasterror = `skipped ${file.name}: ${badreason}`;
+        uploadstatus.textContent = lasterror;
         continue;
       }
       uploadstatus.textContent = `uploading ${file.name}..`;
@@ -386,13 +389,18 @@ async function renderfolder(folder) {
         const dataurl = await fileaspreview(file);
         const contentbase64 = dataurl.split(",")[1] || "";
         const r = await apipost("/manage/upload", {folder, filename: file.name, contentBase64: contentbase64});
-        if (!r.ok) uploadstatus.textContent = `failed on ${file.name}: ${r.body?.error || r.status}`;
+        if (!r.ok) {lasterror = `failed on ${file.name}: ${r.body?.error || r.status}`; uploadstatus.textContent = lasterror}
+        else uploaded++;
       } catch (e) {
-        uploadstatus.textContent = `failed on ${file.name}: ${e.message || e}`;
+        lasterror = `failed on ${file.name}: ${e.message || e}`;
+        uploadstatus.textContent = lasterror;
       }
     }
-    uploadstatus.textContent = "";
-    refresh();
+    if (uploaded && !lasterror) {
+      uploadstatus.textContent = `uploaded ${uploaded} file(s)! give the drive a couple minutes to update before they show up here.`;
+    } else if (uploaded) {
+      uploadstatus.textContent = `uploaded ${uploaded} file(s), but ${lasterror}. give the drive a couple minutes to update.`;
+    }
   }
 
   fileinput.addEventListener("change", () => {
