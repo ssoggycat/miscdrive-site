@@ -4,15 +4,6 @@
 
 <p>you can leave comments on images with <img width="16.5" src="/assets/svg/readme/comment.svg"/> if you want!</p>
 
-<li>cleo - stupidboi8768</li>
-<li>grey - box0mox</li>
-<li>fatcat - pringlemanlol</li>
-<li>mouse, nala - cxlesti</li>
-<li>peanut, kai - ktg5</li>
-<li>willow, pip - cattotheidiot</li>
-<li>marsella - pomidorka1515</li>
-<li>tina - skyebrrt</li>
-
 <hr>
 
 <p><img width="20" src="/assets/svg/readme/link.svg"/>

@@ -3,8 +3,10 @@
 import {drive} from "./utils.js";
 import {drivediscord} from "./login.js";
 import {drivemedia} from "./media.js";
+import {mdhelper} from "./markdown.js";
 
 const {esc, basename, extname, formatbytes, formattimecompact, iconfor, imageext, videoext, audioext, rawurl, thumburlsmall} = drive;
+const {mdtohtml} = mdhelper({esc});
 const managebase = "https://api.soggy.cat";
 
 const discordmenu = document.querySelector(".discordmenu"),
@@ -196,14 +198,52 @@ async function renderfolder(folder) {
         <button type="button" class="manageselectdeletebtn">delete selected</button>
         <button type="button" class="manageselectclearbtn">cancel</button>
       </div>
+      <button type="button" class="managereadmebtn">readme</button>
       <label class="manageupload">
         + add photos
         <input type="file" accept="image/png,image/jpeg,image/gif,image/webp,image/bmp,video/mp4,video/webm,video/quicktime,video/x-matroska" multiple hidden>
       </label>
     </div>
+    <div class="managereadme" hidden>
+      <div class="managereadmeedit">
+        <textarea class="managereadmetextarea" placeholder="write a readme for this folder.. markdown supported"></textarea>
+        <span class="managereadmestatus"></span>
+      </div>
+      <div class="managereadmepreview"></div>
+    </div>
     <div class="managegrid"></div>
     <div class="manageuploadstatus"></div>
   `;
+  const readmebtn = section.querySelector(".managereadmebtn");
+  const readmepanel = section.querySelector(".managereadme");
+  const readmetextarea = section.querySelector(".managereadmetextarea");
+  const readmepreview = section.querySelector(".managereadmepreview");
+  const readmestatus = section.querySelector(".managereadmestatus");
+  let readmeloaded = false;
+  let readmedebounce = null;
+  function syncreadmepreview() {
+    readmepreview.innerHTML = mdtohtml(readmetextarea.value);
+  }
+  readmetextarea.addEventListener("input", () => {
+    syncreadmepreview();
+    readmestatus.textContent = "saving..";
+    window.clearTimeout(readmedebounce);
+    readmedebounce = window.setTimeout(async () => {
+      const r = await apipost("/manage/readme", {folder, content: readmetextarea.value});
+      readmestatus.textContent = r.ok ? "saved" : `failed: ${r.body?.error || r.status}`;
+    }, 600);
+  });
+  readmebtn.addEventListener("click", async () => {
+    readmepanel.hidden = !readmepanel.hidden;
+    if (readmepanel.hidden || readmeloaded) return;
+    readmeloaded = true;
+    readmestatus.textContent = "loading..";
+    const r = await apiget(`/manage/readme?folder=${encodeURIComponent(folder)}`);
+    readmestatus.textContent = "";
+    if (!r.ok) {readmestatus.textContent = `couldn't load: ${r.body?.error || r.status}`; return}
+    readmetextarea.value = r.body?.content || "";
+    syncreadmepreview();
+  });
   const grid = section.querySelector(".managegrid");
   const fileinput = section.querySelector("input[type=file]");
   const uploadstatus = section.querySelector(".manageuploadstatus");

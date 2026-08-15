@@ -88,6 +88,14 @@
 }
 .manageselectdeletebtn {color: #df9d9b}
 
+.managereadmebtn {
+    background: #2b2b2b; border: none;
+    border-radius: 6px; color: #e3e3e3;
+    padding: 6px 12px; font-size: 12px;
+    cursor: pointer;
+}
+.managereadmebtn:hover {background: #333}
+
 .manageupload {
     margin-left: auto;
     background: #2b2b2b; color: #8ab4f8;
@@ -95,6 +103,34 @@
     cursor: pointer; font-size: 12px;
 }
 .manageupload:hover {background: #333}
+
+.managereadme {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 12px;
+}
+.managereadme[hidden] {display: none}
+.managereadmeedit {
+    display: flex; flex-direction: column; gap: 4px;
+}
+.managereadmetextarea {
+    width: 100%; min-height: 220px; resize: vertical;
+    background: #111; border: 1px solid #2b2b2b;
+    border-radius: 6px; color: #e3e3e3;
+    font-family: Consolas, monospace; font-size: 12px;
+    padding: 10px; box-sizing: border-box;
+}
+.managereadmestatus {color: #9aa0a6; font-size: 11px}
+.managereadmepreview {
+    min-height: 220px;
+    background: #111; border: 1px solid #2b2b2b;
+    border-radius: 6px; padding: 10px;
+    overflow-y: auto; font-size: 13px;
+}
+.managereadmepreview :first-child {margin-top: 0}
+
+@media (max-width: 700px) {
+    .managereadme {grid-template-columns: 1fr}
+}
 
 .managegrid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
